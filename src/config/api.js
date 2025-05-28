@@ -5,9 +5,9 @@
 
 // Get the backend URL based on environment
 const getBackendUrl = () => {
-  // In production, use Supabase Edge Functions
+  // In production, use the deployed backend on Render
   if (process.env.NODE_ENV === 'production') {
-    return process.env.REACT_APP_BACKEND_URL || 'https://jjopttxsidrgspjavhkw.supabase.co/functions/v1';
+    return process.env.REACT_APP_BACKEND_URL || 'https://ceelosol-backend.onrender.com';
   }
 
   // In development, use localhost

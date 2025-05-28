@@ -592,4 +592,14 @@ export const formatLobbyStatus = (status) => {
 };
 
 // Helper function to calculate total commitment
-export const calculate
+export const calculateTotalCommitment = (difficulty, totalRounds) => {
+  const betPerRound = difficulty === 'easy' ? 0.1 : 0.5;
+  return betPerRound * totalRounds;
+};
+
+// Helper function to calculate max potential winnings
+export const calculateMaxWinnings = (difficulty, totalRounds, maxPlayers) => {
+  const betPerRound = difficulty === 'easy' ? 0.1 : 0.5;
+  const potPerRound = betPerRound * maxPlayers;
+  return potPerRound * totalRounds; // If you win every round
+};

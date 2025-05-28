@@ -574,4 +574,22 @@ export const formatDifficulty = (difficulty) => {
 };
 
 // Helper function to format lobby status
-export const
+export const formatLobbyStatus = (status) => {
+  switch (status) {
+    case 'waiting':
+      return 'Waiting for players';
+    case 'payment':
+      return 'Payment required';
+    case 'ready':
+      return 'Ready to start';
+    case 'in-game':
+      return 'Game in progress';
+    case 'finished':
+      return 'Game finished';
+    default:
+      return 'Unknown';
+  }
+};
+
+// Helper function to calculate total commitment
+export const calculate

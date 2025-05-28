@@ -22,6 +22,23 @@ class SocketService {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }
 
+  // Transform backend lobby data to frontend format
+  transformLobbyData(backendLobby) {
+    return {
+      ...backendLobby,
+      // Ensure players array exists
+      players: backendLobby.players || [],
+      // Map backend fields to frontend expectations
+      betAmount: backendLobby.difficulty === 'easy' ? 0.1 : 0.5,
+      rounds: backendLobby.totalRounds || backendLobby.rounds || 1,
+      // Preserve all original fields
+      difficulty: backendLobby.difficulty,
+      totalRounds: backendLobby.totalRounds,
+      status: backendLobby.status,
+      treasuryAddress: backendLobby.treasuryAddress
+    };
+  }
+
   connect(walletAddress) {
     // Prevent multiple simultaneous connection attempts
     if (this.isConnecting) {
@@ -310,7 +327,16 @@ class SocketService {
 
     events.forEach(event => {
       this.socket.on(event, (data) => {
-        // Silently forward event
+        // Transform lobby data for specific events
+        if (event === 'lobby:created' && data.lobby) {
+          data.lobby = this.transformLobbyData(data.lobby);
+        } else if (event === 'lobby:updated' && data) {
+          data = this.transformLobbyData(data);
+        } else if (event === 'lobbies:list' && Array.isArray(data)) {
+          data = data.map(lobby => this.transformLobbyData(lobby));
+        }
+        
+        // Forward transformed event
         this.notifyListeners(event, data);
       });
     });
@@ -567,13 +593,4 @@ export const formatLobbyStatus = (status) => {
 
 // Helper function to calculate total commitment
 export const calculateTotalCommitment = (difficulty, totalRounds) => {
-  const betPerRound = difficulty === 'easy' ? 0.1 : 0.5;
-  return betPerRound * totalRounds;
-};
-
-// Helper function to calculate max potential winnings
-export const calculateMaxWinnings = (difficulty, totalRounds, maxPlayers) => {
-  const betPerRound = difficulty === 'easy' ? 0.1 : 0.5;
-  const potPerRound = betPerRound * maxPlayers;
-  return potPerRound * totalRounds; // If you win every round
-};
+  const betPerRound = difficulty === 'easy'

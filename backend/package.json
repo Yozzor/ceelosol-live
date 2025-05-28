@@ -4,7 +4,7 @@
   "description": "Backend for CeeloSol game",
   "main": "dist/server.js",
   "scripts": {
-    "start": "node dist/server.js",
+    "start": "node minimal-server.js",
     "dev": "ts-node src/server.ts",
     "build": "tsc",
     "server": "node scripts/server-manager.js",

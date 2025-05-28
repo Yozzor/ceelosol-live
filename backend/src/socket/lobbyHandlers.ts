@@ -124,7 +124,9 @@ export function setupLobbyHandlers(io: SocketIOServer) {
       lobbies.set(lobbyId, lobby);
       socket.join(lobbyId);
 
-      console.log(`🏠 Lobby created: ${lobbyId} by ${walletAddress}`);
+           console.log(`🏠 Lobby created: ${lobbyId} by ${walletAddress}`);
+      console.log(`🏠 Lobby players after creation:`, lobby.players);
+      console.log(`🏠 Lobby status after creation:`, lobby.status);
 
       // Notify creator
       socket.emit('lobby:created', { lobbyId, lobby });

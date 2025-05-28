@@ -17,6 +17,11 @@ import './LobbyRoom.css';
 export function LobbyRoom({ lobby, onLeaveLobby }) {
   const { publicKey } = useAuth();
   const [currentLobby, setCurrentLobby] = useState(lobby);
+
+  // Debug lobby data
+  console.log('🏠 LobbyRoom received lobby:', lobby);
+  console.log('🏠 LobbyRoom players:', lobby?.players);
+  console.log('🏠 LobbyRoom current user:', publicKey);
   const [isReady, setIsReady] = useState(false);
   const [gameState, setGameState] = useState(null);
   const [roundState, setRoundState] = useState(null);

@@ -60,9 +60,17 @@ class SocketService {
     // Force production URL for immediate fix with fallback
     let socketUrl;
     if (process.env.NODE_ENV === 'production') {
-      // Try primary backend URL first
-      socketUrl = 'https://ceelosol-backend.onrender.com';
+      // Try primary backend URL first, with fallback options
+      const backendUrls = [
+        'https://ceelosol-backend.onrender.com',
+        'wss://ceelosol-backend.onrender.com',
+        'https://ceelosol-backend.onrender.com:443'
+      ];
+
+      // Use the first URL for now, but we'll implement retry logic
+      socketUrl = backendUrls[0];
       console.log('🔌 Production mode: Using backend URL:', socketUrl);
+      console.log('🔌 Available fallback URLs:', backendUrls.slice(1));
     } else {
       socketUrl = API_CONFIG.SOCKET_URL;
       console.log('🔌 Development mode: Using local URL:', socketUrl);
@@ -71,20 +79,29 @@ class SocketService {
     const isMobileDevice = this.isMobile();
     console.log('🔌 Connecting to socket URL:', socketUrl, 'Mobile:', isMobileDevice);
 
-    // Mobile-optimized socket configuration
+    // Production-optimized socket configuration
+    const isProduction = process.env.NODE_ENV === 'production';
     const socketConfig = {
-      transports: isMobileDevice ? ['polling'] : ['polling', 'websocket'], // Polling only for mobile initially
-      timeout: isMobileDevice ? 30000 : 20000, // Longer timeout for mobile
+      transports: isProduction ? ['polling', 'websocket'] : (isMobileDevice ? ['polling'] : ['polling', 'websocket']),
+      timeout: isProduction ? 45000 : (isMobileDevice ? 30000 : 20000), // Longer timeout for production
       forceNew: true,
       autoConnect: true,
-      upgrade: isMobileDevice ? false : true, // Disable upgrade on mobile initially
+      upgrade: isProduction ? true : (isMobileDevice ? false : true),
       rememberUpgrade: false,
       reconnection: true,
-      reconnectionDelay: isMobileDevice ? 2000 : 1000,
-      reconnectionAttempts: isMobileDevice ? 15 : 10,
+      reconnectionDelay: isProduction ? 3000 : (isMobileDevice ? 2000 : 1000),
+      reconnectionAttempts: isProduction ? 20 : (isMobileDevice ? 15 : 10),
       maxHttpBufferSize: 1e6,
+      // Production-specific options
+      ...(isProduction && {
+        pingTimeout: 120000, // 2 minutes for production
+        pingInterval: 30000,  // 30 seconds for production
+        forceBase64: false,
+        enablesXDR: false,
+        withCredentials: false
+      }),
       // Mobile-specific options
-      ...(isMobileDevice && {
+      ...(isMobileDevice && !isProduction && {
         pingTimeout: 60000,
         pingInterval: 25000,
       })

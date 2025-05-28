@@ -1,9 +1,31 @@
 const express = require('express');
 const cors = require('cors');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
 
-console.log('🚀 Starting CeeloSol Backend Server...');
+console.log('🚀 Starting CeeloSol Backend Server with Socket.IO...');
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: [
+      "https://ceelosol-live.onrender.com",
+      "https://ceelosol.com", 
+      "https://www.ceelosol.com",
+      "http://localhost:3000",
+      "http://localhost:3002"
+    ],
+    methods: ["GET", "POST"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"]
+  },
+  pingTimeout: 120000,
+  pingInterval: 30000,
+  transports: ['polling', 'websocket'],
+  allowEIO3: true
+});
+
 const PORT = process.env.PORT || 3001;
 
 // DEDICATED HOUSE TREASURY WALLET (SEPARATE FROM ALL USER WALLETS)
@@ -66,11 +88,43 @@ app.get('/api/activity/stats', (req, res) => {
   });
 });
 
+// Basic Socket.IO lobby system
+const lobbies = new Map();
+
+io.on('connection', (socket) => {
+  console.log('🔌 Client connected:', socket.id);
+
+  socket.on('lobbies:request', () => {
+    socket.emit('lobbies:list', Array.from(lobbies.values()));
+  });
+
+  socket.on('lobby:create', (data) => {
+    const lobbyId = Date.now().toString();
+    const lobby = {
+      id: lobbyId,
+      name: data.name || 'New Lobby',
+      maxPlayers: data.maxPlayers || 4,
+      betAmount: data.betAmount || 0.1,
+      rounds: data.rounds || 3,
+      players: [],
+      status: 'waiting'
+    };
+    lobbies.set(lobbyId, lobby);
+    socket.emit('lobby:created', { lobbyId, lobby });
+    io.emit('lobbies:list', Array.from(lobbies.values()));
+  });
+
+  socket.on('disconnect', () => {
+    console.log('🔌 Client disconnected:', socket.id);
+  });
+});
+
 // Start server
-app.listen(PORT, () => {
-  console.log(`✅ CeeloSol Backend running on port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`✅ CeeloSol Backend with Socket.IO running on port ${PORT}`);
   console.log(`🌐 Health: http://localhost:${PORT}/api/health`);
   console.log(`🏦 House wallet: http://localhost:${PORT}/api/house-wallet`);
+  console.log(`🎮 Socket.IO enabled for PVP lobbies`);
 });
 
 // Keep alive

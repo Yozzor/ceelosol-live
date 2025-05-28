@@ -26,18 +26,28 @@ export class TreasuryMonitor {
       }
 
       const data = await response.json();
-      if (data.success && data.houseWallet.publicKey) {
-        this.treasuryAddress = data.houseWallet.publicKey;
-        console.log('🏦 Treasury address initialized:', this.treasuryAddress);
+      if (data.success) {
+        // Handle both response formats:
+        // Full backend: { success: true, houseWallet: { publicKey: "..." } }
+        // Minimal server: { success: true, address: "..." }
+        this.treasuryAddress = data.houseWallet?.publicKey || data.address;
+
+        if (this.treasuryAddress) {
+          console.log('🏦 Treasury address initialized:', this.treasuryAddress);
+        } else {
+          console.error('Failed to get house wallet address from backend:', data);
+          // Fallback to DEDICATED HOUSE TREASURY (separate from user wallets)
+          this.treasuryAddress = '8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS';
+        }
       } else {
         console.error('Failed to get house wallet address from backend:', data);
-        // Fallback to hardcoded address
-        this.treasuryAddress = 'ENXTXoFRDJzsWtWFQ1vAMGTHbPAoxBC4KSyPYXCi2n9T';
+        // Fallback to DEDICATED HOUSE TREASURY (separate from user wallets)
+        this.treasuryAddress = '8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS';
       }
     } catch (error) {
       console.error('Error fetching house wallet address:', error.message || error);
-      // Fallback to hardcoded address
-      this.treasuryAddress = 'ENXTXoFRDJzsWtWFQ1vAMGTHbPAoxBC4KSyPYXCi2n9T';
+      // Fallback to DEDICATED HOUSE TREASURY (separate from user wallets)
+      this.treasuryAddress = '8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS';
     }
   }
 

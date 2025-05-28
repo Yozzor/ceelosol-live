@@ -1,0 +1,30 @@
+{
+  "treasuryWallet": {
+    "publicKey": "8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS",
+    "secretKeyBase58": "EHVhPoeXMpwczeQ9JDzqzXV6njzAi4NueDBXSbZ9ttdu7Tavv2BKGHANPN7Tqw8i7To4JnRDjmxXJnXbo3f4hRr",
+    "secretKeyArray": [11,116,185,133,189,84,197,34,11,252,212,84,198,58,185,221,186,226,121,211,233,28,196,230,204,122,101,155,16,83,139,174,116,55,45,237,224,153,108,28,79,225,16,255,104,3,242,63,129,18,12,112,33,221,59,65,68,145,106,171,109,3,245,217],
+    "createdAt": "2024-12-19T15:30:00.000Z",
+    "purpose": "CeeloSol House Treasury - Dedicated gambling platform wallet",
+    "securityLevel": "MAXIMUM",
+    "accessLevel": "Backend Only"
+  },
+  "oldTestWallet": {
+    "publicKey": "GMAuqtZuYpwt3Y9EUeeEfQFJGDpsExWXG1ZegGBQwAW6",
+    "status": "USER_WALLET_ONLY",
+    "note": "This was incorrectly used as treasury - now remains as user wallet"
+  },
+  "migration": {
+    "from": "GMAuqtZuYpwt3Y9EUeeEfQFJGDpsExWXG1ZegGBQwAW6",
+    "to": "8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS",
+    "reason": "Security fix - separate treasury from user wallets",
+    "date": "2024-12-19"
+  },
+  "environmentVariable": {
+    "name": "BANKER_SECRET_KEY",
+    "value": "EHVhPoeXMpwczeQ9JDzqzXV6njzAi4NueDBXSabZ9ttdu7Tavv2BKGHANPN7Tqw8i7To4JnRDjmxXJnXbo3f4hRr"
+  },
+  "monitoring": {
+    "solanaExplorer": "https://explorer.solana.com/address/8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS",
+    "solscan": "https://solscan.io/account/8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS"
+  }
+}

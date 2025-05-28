@@ -17,6 +17,11 @@ class SocketService {
     this.lastConnectionAttempt = null;
   }
 
+  // Detect if running on mobile device
+  isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }
+
   connect(walletAddress) {
     // Prevent multiple simultaneous connection attempts
     if (this.isConnecting) {
@@ -24,9 +29,10 @@ class SocketService {
       return this.socket;
     }
 
-    // Rate limiting: prevent too frequent connection attempts
+    // Rate limiting: prevent too frequent connection attempts (longer for mobile)
     const now = Date.now();
-    if (this.lastConnectionAttempt && (now - this.lastConnectionAttempt) < 1000) {
+    const rateLimit = this.isMobile() ? 2000 : 1000; // 2s for mobile, 1s for desktop
+    if (this.lastConnectionAttempt && (now - this.lastConnectionAttempt) < rateLimit) {
       console.log('🔌 Rate limiting: too frequent connection attempts, skipping...');
       return this.socket;
     }
@@ -56,14 +62,29 @@ class SocketService {
       ? 'https://ceelosol-backend.onrender.com'
       : API_CONFIG.SOCKET_URL;
 
-    console.log('🔌 Connecting to socket URL:', socketUrl);
+    const isMobileDevice = this.isMobile();
+    console.log('🔌 Connecting to socket URL:', socketUrl, 'Mobile:', isMobileDevice);
 
-    this.socket = io(socketUrl, {
-      transports: ['websocket', 'polling'],
-      timeout: 10000,
+    // Mobile-optimized socket configuration
+    const socketConfig = {
+      transports: isMobileDevice ? ['polling'] : ['polling', 'websocket'], // Polling only for mobile initially
+      timeout: isMobileDevice ? 30000 : 20000, // Longer timeout for mobile
       forceNew: true,
       autoConnect: true,
-    });
+      upgrade: isMobileDevice ? false : true, // Disable upgrade on mobile initially
+      rememberUpgrade: false,
+      reconnection: true,
+      reconnectionDelay: isMobileDevice ? 2000 : 1000,
+      reconnectionAttempts: isMobileDevice ? 15 : 10,
+      maxHttpBufferSize: 1e6,
+      // Mobile-specific options
+      ...(isMobileDevice && {
+        pingTimeout: 60000,
+        pingInterval: 25000,
+      })
+    };
+
+    this.socket = io(socketUrl, socketConfig);
 
     this.socket.on('connect', () => {
       // Silently handle successful connection
@@ -114,7 +135,14 @@ class SocketService {
     });
 
     this.socket.on('connect_error', (error) => {
-      // Silently handle connection errors - no ugly console messages
+      console.log('🔌 Connection error details:', {
+        error: error.message || error,
+        type: error.type,
+        description: error.description,
+        context: error.context,
+        transport: error.transport
+      });
+
       this.isConnected = false;
       this.isConnecting = false;
 
@@ -123,10 +151,13 @@ class SocketService {
         clearTimeout(this.retryTimeout);
       }
 
-      // Implement exponential backoff retry logic
+      // Mobile-friendly retry logic with longer delays
       if (walletAddress && this.retryCount < this.maxRetries) {
         this.retryCount++;
-        const delay = Math.min(this.retryDelay * Math.pow(2, this.retryCount - 1), this.maxRetryDelay);
+        // Longer delays for mobile networks
+        const delay = Math.min(this.retryDelay * Math.pow(1.5, this.retryCount - 1), this.maxRetryDelay);
+
+        console.log(`🔄 Retrying connection in ${delay}ms (attempt ${this.retryCount}/${this.maxRetries})`);
 
         this.retryTimeout = setTimeout(() => {
           if (!this.isConnected && !this.isConnecting) {
@@ -134,9 +165,9 @@ class SocketService {
           }
         }, delay);
       } else if (this.retryCount >= this.maxRetries) {
-        // Max retries reached - notify listeners but don't log ugly errors
+        console.log('❌ Max retries reached for socket connection');
         this.notifyListeners('error', {
-          message: 'PVP lobbies temporarily unavailable',
+          message: 'PVP lobbies temporarily unavailable - please check your internet connection',
           error,
           maxRetriesReached: true
         });
@@ -144,7 +175,7 @@ class SocketService {
 
       // Notify listeners of error with user-friendly message
       this.notifyListeners('error', {
-        message: 'PVP lobbies temporarily unavailable',
+        message: 'Connecting to PVP lobbies...',
         error,
         retryCount: this.retryCount,
         maxRetries: this.maxRetries

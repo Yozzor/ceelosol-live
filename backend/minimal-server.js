@@ -12,7 +12,9 @@ const HOUSE_WALLET_ADDRESS = '8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS';
 // Middleware
 app.use(cors({
   origin: ['https://ceelosol-live.onrender.com', 'http://localhost:3000'],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json());
 
@@ -30,7 +32,11 @@ app.get('/api/house-wallet', (req, res) => {
   try {
     res.json({
       success: true,
-      address: HOUSE_WALLET_ADDRESS
+      houseWallet: {
+        publicKey: HOUSE_WALLET_ADDRESS,
+        balance: 0,
+        balanceInSOL: 0
+      }
     });
   } catch (error) {
     console.error('Error fetching house wallet:', error);

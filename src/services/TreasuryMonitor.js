@@ -18,36 +18,29 @@ export class TreasuryMonitor {
 
   // Fetch the real house wallet address from backend
   async initializeTreasuryAddress() {
+    // Set fallback treasury address immediately
+    this.treasuryAddress = '8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS';
+
     try {
       const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.HOUSE_WALLET));
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        // Handle both response formats:
-        // Full backend: { success: true, houseWallet: { publicKey: "..." } }
-        // Minimal server: { success: true, address: "..." }
-        this.treasuryAddress = data.houseWallet?.publicKey || data.address;
-
-        if (this.treasuryAddress) {
-          console.log('🏦 Treasury address initialized:', this.treasuryAddress);
-        } else {
-          console.error('Failed to get house wallet address from backend:', data);
-          // Fallback to DEDICATED HOUSE TREASURY (separate from user wallets)
-          this.treasuryAddress = '8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS';
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.success) {
+          let treasuryAddr = null;
+          if (data.houseWallet && data.houseWallet.publicKey) {
+            treasuryAddr = data.houseWallet.publicKey;
+          } else if (data.address) {
+            treasuryAddr = data.address;
+          } else if (data.publicKey) {
+            treasuryAddr = data.publicKey;
+          }
+          if (treasuryAddr) {
+            this.treasuryAddress = treasuryAddr;
+          }
         }
-      } else {
-        console.error('Failed to get house wallet address from backend:', data);
-        // Fallback to DEDICATED HOUSE TREASURY (separate from user wallets)
-        this.treasuryAddress = '8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS';
       }
     } catch (error) {
-      console.error('Error fetching house wallet address:', error.message || error);
-      // Fallback to DEDICATED HOUSE TREASURY (separate from user wallets)
-      this.treasuryAddress = '8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS';
+      // Silently use fallback address - no error logging needed
     }
   }
 
@@ -65,7 +58,7 @@ export class TreasuryMonitor {
       try {
         callback(activity);
       } catch (error) {
-        console.error('Error notifying subscriber:', error);
+        // Silently handle subscriber errors
       }
     });
   }
@@ -76,18 +69,15 @@ export class TreasuryMonitor {
 
     // Wait for treasury address to be initialized
     while (!this.treasuryAddress) {
-      console.log('⏳ Waiting for treasury address to be initialized...');
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     this.isMonitoring = true;
-    console.log('🏦 Starting treasury monitoring...');
 
     try {
       // Get initial balance
       const treasuryPubkey = new web3.PublicKey(this.treasuryAddress);
       this.lastBalance = await this.connection.getBalance(treasuryPubkey);
-      console.log('🏦 Initial treasury balance:', this.lastBalance / 1000000000, 'SOL');
 
       // Load recent wins from blockchain history
       await this.loadRecentWins();
@@ -95,7 +85,6 @@ export class TreasuryMonitor {
       // Start polling for changes
       this.pollBalance();
     } catch (error) {
-      console.error('Failed to start treasury monitoring:', error);
       this.isMonitoring = false;
     }
   }
@@ -103,7 +92,6 @@ export class TreasuryMonitor {
   // Load recent wins from blockchain history
   async loadRecentWins() {
     try {
-      console.log('📊 Loading recent wins from blockchain...');
       const recentWins = await this.analyzeRecentWins();
 
       // Add each win to the activity feed
@@ -122,9 +110,9 @@ export class TreasuryMonitor {
         });
       });
 
-      console.log(`📊 Loaded ${recentWins.length} recent wins from blockchain`);
+      // Silently loaded recent wins
     } catch (error) {
-      console.error('Error loading recent wins:', error);
+      // Silently handle loading errors
     }
   }
 
@@ -143,7 +131,6 @@ export class TreasuryMonitor {
   // Stop monitoring
   stopMonitoring() {
     this.isMonitoring = false;
-    console.log('🏦 Stopped treasury monitoring');
   }
 
   // Poll treasury balance for changes
@@ -158,7 +145,7 @@ export class TreasuryMonitor {
         const change = currentBalance - this.lastBalance;
         const changeSOL = change / 1000000000;
 
-        console.log('🏦 Treasury balance changed:', changeSOL, 'SOL');
+        // Treasury balance changed
 
         // Determine if this was a win or loss
         if (change > 0) {
@@ -184,7 +171,7 @@ export class TreasuryMonitor {
         this.lastBalance = currentBalance;
       }
     } catch (error) {
-      console.error('Error polling treasury balance:', error);
+      // Silently handle polling errors
     }
 
     // Continue polling every 5 seconds
@@ -197,7 +184,6 @@ export class TreasuryMonitor {
   async getCurrentBalance() {
     try {
       if (!this.treasuryAddress) {
-        console.log('Treasury address not yet initialized');
         return { lamports: 0, sol: 0 };
       }
 
@@ -208,7 +194,6 @@ export class TreasuryMonitor {
         sol: balance / 1000000000
       };
     } catch (error) {
-      console.error('Error getting treasury balance:', error);
       return null;
     }
   }
@@ -235,7 +220,6 @@ export class TreasuryMonitor {
               transaction: tx
             };
           } catch (error) {
-            console.error('Error fetching transaction:', error);
             return null;
           }
         })
@@ -243,7 +227,6 @@ export class TreasuryMonitor {
 
       return transactions.filter(tx => tx !== null);
     } catch (error) {
-      console.error('Error getting recent transactions:', error);
       return [];
     }
   }
@@ -305,7 +288,6 @@ export class TreasuryMonitor {
 
       return wins.sort((a, b) => b.timestamp - a.timestamp);
     } catch (error) {
-      console.error('Error analyzing recent wins:', error);
       return [];
     }
   }

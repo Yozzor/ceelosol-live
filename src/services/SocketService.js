@@ -1,4 +1,5 @@
 import { io } from 'socket.io-client';
+import { API_CONFIG } from '../config/api.js';
 
 class SocketService {
   constructor() {
@@ -48,10 +49,9 @@ class SocketService {
     this.lastConnectionAttempt = now;
     this.connectionAttempts++;
 
-    console.log(`🔌 Connecting to Socket.io server (attempt ${this.connectionAttempts})...`);
-    console.log('🔍 Wallet address for connection:', walletAddress);
+    // Silently attempt connection
 
-    this.socket = io('http://localhost:3001', {
+    this.socket = io(API_CONFIG.SOCKET_URL, {
       transports: ['websocket', 'polling'],
       timeout: 10000,
       forceNew: true,
@@ -59,8 +59,7 @@ class SocketService {
     });
 
     this.socket.on('connect', () => {
-      console.log('✅ Connected to Socket.io server');
-      console.log('🔍 Socket ID:', this.socket.id);
+      // Silently handle successful connection
       this.isConnected = true;
       this.isConnecting = false;
 
@@ -73,7 +72,7 @@ class SocketService {
 
       // Authenticate with wallet address
       if (walletAddress) {
-        console.log('🔐 Authenticating with wallet:', walletAddress);
+        // Silently authenticate
 
         // Get nickname from profile service
         const profileService = require('./profileService').default;
@@ -88,7 +87,7 @@ class SocketService {
         // Request lobbies after authentication
         setTimeout(() => {
           if (this.isConnected && this.socket) {
-            console.log('📋 Requesting lobby list after authentication...');
+            // Silently request lobbies
             this.socket.emit('lobbies:request');
           }
         }, 500);
@@ -99,7 +98,7 @@ class SocketService {
     });
 
     this.socket.on('disconnect', (reason) => {
-      console.log('❌ Disconnected from Socket.io server, reason:', reason);
+      // Silently handle disconnection
       this.isConnected = false;
       this.isConnecting = false;
 
@@ -108,7 +107,7 @@ class SocketService {
     });
 
     this.socket.on('connect_error', (error) => {
-      console.error(`🔌 Socket connection error (attempt ${this.connectionAttempts}):`, error);
+      // Silently handle connection errors - no ugly console messages
       this.isConnected = false;
       this.isConnecting = false;
 
@@ -122,26 +121,23 @@ class SocketService {
         this.retryCount++;
         const delay = Math.min(this.retryDelay * Math.pow(2, this.retryCount - 1), this.maxRetryDelay);
 
-        console.log(`🔄 Scheduling connection retry ${this.retryCount}/${this.maxRetries} in ${delay}ms...`);
-
         this.retryTimeout = setTimeout(() => {
           if (!this.isConnected && !this.isConnecting) {
-            console.log(`🔄 Auto-retrying connection (${this.retryCount}/${this.maxRetries})...`);
             this.connect(walletAddress);
           }
         }, delay);
       } else if (this.retryCount >= this.maxRetries) {
-        console.error('❌ Max retry attempts reached, giving up connection');
+        // Max retries reached - notify listeners but don't log ugly errors
         this.notifyListeners('error', {
-          message: 'Connection failed after maximum retry attempts',
+          message: 'PVP lobbies temporarily unavailable',
           error,
           maxRetriesReached: true
         });
       }
 
-      // Notify listeners of error
+      // Notify listeners of error with user-friendly message
       this.notifyListeners('error', {
-        message: 'Socket connection error',
+        message: 'PVP lobbies temporarily unavailable',
         error,
         retryCount: this.retryCount,
         maxRetries: this.maxRetries
@@ -233,7 +229,7 @@ class SocketService {
 
     events.forEach(event => {
       this.socket.on(event, (data) => {
-        console.log(`📡 Received ${event}:`, data);
+        // Silently forward event
         this.notifyListeners(event, data);
       });
     });

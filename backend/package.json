@@ -1,7 +1,7 @@
 {
   "name": "ceelosol-backend",
   "version": "1.0.0",
-  "description": "Backend for CeeloSol game",
+  "description": "Backend for CeeloSol game - Updated",
   "main": "dist/server.js",
   "scripts": {
     "start": "node minimal-server.js",

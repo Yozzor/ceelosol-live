@@ -61,9 +61,13 @@ export function LobbyBrowser({ onBackToModeSelect, onJoinLobby }) {
       });
 
       const unsubscribeError = socketService.on('error', (errorData) => {
-        console.error('❌ Socket error:', errorData);
-        setError(errorData.message);
-        setTimeout(() => setError(null), 5000);
+        // Handle socket errors gracefully
+        if (errorData.maxRetriesReached) {
+          setError('PVP lobbies temporarily unavailable');
+        } else {
+          setError(errorData.message || 'Connection issue');
+        }
+        setTimeout(() => setError(null), 8000);
       });
 
       const unsubscribeLobbyCreated = socketService.on('lobby:created', (data) => {
@@ -85,7 +89,7 @@ export function LobbyBrowser({ onBackToModeSelect, onJoinLobby }) {
       const unsubscribeDisconnect = socketService.on('disconnect', () => {
         console.log('🔴 Socket disconnected - updating UI state');
         setIsConnected(false);
-        setError('Connection lost');
+        setError('PVP lobbies temporarily unavailable');
       });
 
       // Single connection status check after a reasonable delay
@@ -94,9 +98,9 @@ export function LobbyBrowser({ onBackToModeSelect, onJoinLobby }) {
         console.log('🔍 LobbyBrowser connection status check:', status);
         setIsConnected(status.isConnected);
 
-        // If not connected after initial delay, show error
+        // If not connected after initial delay, show user-friendly message
         if (!status.isConnected && !status.isConnecting) {
-          setError('Failed to connect to server');
+          setError('PVP lobbies temporarily unavailable');
         }
       }, 2000);
 
@@ -189,7 +193,7 @@ export function LobbyBrowser({ onBackToModeSelect, onJoinLobby }) {
       {/* Error Display */}
       {error && (
         <div className="error-message">
-          ⚠️ {error}
+          ⚠️ Socket connection error
         </div>
       )}
 

@@ -3,7 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
@@ -24,10 +27,45 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js" integrity="sha384-LtrjvnR4Twt/qOuYxE721u19sVFLVSA4hf/rRt6PrZTmiPltdZcI7q7PXQBYTKyf" crossorigin="anonymous"></script>
+    <!-- Mobile-safe script loading -->
+    <script>
+      // Mobile-safe script loader
+      function loadScript(src, integrity, crossorigin) {
+        try {
+          var script = document.createElement('script');
+          script.src = src;
+          if (integrity) script.integrity = integrity;
+          if (crossorigin) script.crossOrigin = crossorigin;
+          script.onerror = function() {
+            console.log('Failed to load script:', src);
+          };
+          document.head.appendChild(script);
+        } catch (e) {
+          console.log('Error loading script:', src, e);
+        }
+      }
+
+      function loadCSS(href, integrity, crossorigin) {
+        try {
+          var link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = href;
+          if (integrity) link.integrity = integrity;
+          if (crossorigin) link.crossOrigin = crossorigin;
+          link.onerror = function() {
+            console.log('Failed to load CSS:', href);
+          };
+          document.head.appendChild(link);
+        } catch (e) {
+          console.log('Error loading CSS:', href, e);
+        }
+      }
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" onerror="console.log('jQuery failed to load')"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous" onerror="console.log('Bootstrap CSS failed to load')">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous" onerror="console.log('Bootstrap JS failed to load')"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js" integrity="sha384-LtrjvnR4Twt/qOuYxE721u19sVFLVSA4hf/rRt6PrZTmiPltdZcI7q7PXQBYTKyf" crossorigin="anonymous" onerror="console.log('Bootstrap Bundle failed to load')"></script>
 
     <title>SolanaRoll</title>
     <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -68,18 +106,44 @@
         e.preventDefault();
       }
     });
+    // Mobile-safe error handling
     window.onerror = function(message, source, line, col, error) {
-      var text = error ? error.stack || error : message + ' (at ' + source + ':' + line + ':' + col + ')';
-      errors.textContent += text + '\n';
-      errors.style.display = '';
-    };
-    console.error = (function(old) {
-      return function error() {
-        errors.textContent += Array.prototype.slice.call(arguments).join(' ') + '\n';
-        errors.style.display = '';
-        old.apply(this, arguments);
+      try {
+        var text = error ? (error.stack || error.toString()) : message + ' (at ' + (source || 'unknown') + ':' + (line || 0) + ':' + (col || 0) + ')';
+        var errorDiv = document.getElementById('errors');
+        if (errorDiv) {
+          errorDiv.textContent += text + '\n';
+          errorDiv.style.display = '';
+        }
+        // Also log to console for mobile debugging
+        if (console && console.log) {
+          console.log('Error caught:', text);
+        }
+      } catch (e) {
+        // Fail silently on mobile if error handling fails
       }
-    })(console.error);
+      return true; // Prevent default browser error handling
+    };
+
+    // Mobile-safe console.error override
+    if (console && console.error) {
+      console.error = (function(old) {
+        return function error() {
+          try {
+            var errorDiv = document.getElementById('errors');
+            if (errorDiv) {
+              errorDiv.textContent += Array.prototype.slice.call(arguments).join(' ') + '\n';
+              errorDiv.style.display = '';
+            }
+            if (old && old.apply) {
+              old.apply(this, arguments);
+            }
+          } catch (e) {
+            // Fail silently on mobile
+          }
+        }
+      })(console.error);
+    }
     </script>
 
     <!--

@@ -3,7 +3,20 @@ import React from 'react';
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null, errorInfo: null };
+    this.state = {
+      hasError: false,
+      error: null,
+      errorInfo: null,
+      isMobile: this.detectMobile()
+    };
+  }
+
+  detectMobile() {
+    try {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    } catch (e) {
+      return false;
+    }
   }
 
   static getDerivedStateFromError(error) {
@@ -12,13 +25,32 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log the error details
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
-    this.setState({
-      error: error,
-      errorInfo: errorInfo
-    });
+    // Mobile-safe error logging
+    try {
+      console.error('ErrorBoundary caught an error:', error, errorInfo);
+
+      // Mobile-specific logging
+      if (this.state.isMobile) {
+        console.log('Mobile Error Details:', {
+          message: error.message,
+          stack: error.stack,
+          componentStack: errorInfo.componentStack,
+          userAgent: navigator.userAgent
+        });
+      }
+
+      this.setState({
+        error: error,
+        errorInfo: errorInfo
+      });
+    } catch (e) {
+      // Fail silently if logging fails on mobile
+      console.log('Error logging failed:', e);
+      this.setState({
+        error: error,
+        errorInfo: errorInfo
+      });
+    }
   }
 
   render() {
@@ -34,7 +66,7 @@ class ErrorBoundary extends React.Component {
           color: 'var(--sa-sand)',
           textAlign: 'center'
         }}>
-          <h2 style={{ 
+          <h2 style={{
             color: 'var(--sa-red)',
             fontFamily: 'Impact, Arial Black, sans-serif',
             marginBottom: '15px'
@@ -60,11 +92,11 @@ class ErrorBoundary extends React.Component {
           >
             🔄 Refresh Page
           </button>
-          
+
           {/* Show error details in development */}
           {process.env.NODE_ENV === 'development' && this.state.error && (
-            <details style={{ 
-              marginTop: '20px', 
+            <details style={{
+              marginTop: '20px',
               textAlign: 'left',
               background: 'rgba(0, 0, 0, 0.3)',
               padding: '15px',
@@ -74,8 +106,8 @@ class ErrorBoundary extends React.Component {
               <summary style={{ cursor: 'pointer', fontWeight: 'bold', marginBottom: '10px' }}>
                 🔍 Error Details (Development)
               </summary>
-              <pre style={{ 
-                whiteSpace: 'pre-wrap', 
+              <pre style={{
+                whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',
                 color: 'var(--sa-sand)',
                 fontSize: '0.8rem'

@@ -70,8 +70,10 @@ export function LobbyBrowser({ onBackToModeSelect, onJoinLobby }) {
         setTimeout(() => setError(null), 8000);
       });
 
-      const unsubscribeLobbyCreated = socketService.on('lobby:created', (data) => {
+            const unsubscribeLobbyCreated = socketService.on('lobby:created', (data) => {
         console.log('🏠 Lobby created:', data);
+        console.log('🏠 Lobby data received:', data.lobby);
+        console.log('🏠 Players in created lobby:', data.lobby?.players);
         setShowCreateForm(false);
         // Join the created lobby
         if (onJoinLobby) {

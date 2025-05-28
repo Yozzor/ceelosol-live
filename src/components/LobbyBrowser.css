@@ -1,0 +1,345 @@
+/* LobbyBrowser.css - GTA San Andreas inspired styling */
+
+.lobby-browser {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  color: var(--sa-sand);
+}
+
+.lobby-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.lobby-header h2 {
+  font-family: 'Pricedown', sans-serif;
+  font-size: 2.2rem;
+  color: var(--sa-green);
+  text-shadow: 2px 2px 4px var(--sa-shadow);
+  margin: 0;
+  letter-spacing: 2px;
+}
+
+.back-button {
+  background: linear-gradient(145deg, var(--sa-red), #8b1419);
+  border: 2px solid var(--sa-gold);
+  color: var(--sa-sand);
+  padding: 10px 20px;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+}
+
+.back-button:hover {
+  background: linear-gradient(145deg, var(--sa-gold), #6b5b2f);
+  transform: translateY(-2px);
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-indicator {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+}
+
+.status-indicator.connected {
+  background: rgba(54, 104, 44, 0.4);
+  border: 1px solid var(--sa-green);
+  color: var(--sa-sand);
+}
+
+.status-indicator.disconnected {
+  background: rgba(180, 25, 29, 0.4);
+  border: 1px solid var(--sa-red);
+  color: var(--sa-sand);
+}
+
+
+
+.error-message {
+  background: rgba(180, 25, 29, 0.3);
+  border: 2px solid var(--sa-red);
+  color: var(--sa-sand);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+}
+
+.lobby-actions {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.create-lobby-button, .refresh-button {
+  background: linear-gradient(145deg, var(--sa-green), #2d5016);
+  border: 2px solid var(--sa-gold);
+  color: var(--sa-sand);
+  padding: 12px 24px;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+}
+
+.create-lobby-button:hover, .refresh-button:hover {
+  background: linear-gradient(145deg, var(--sa-gold), #6b5b2f);
+  transform: translateY(-2px);
+}
+
+.refresh-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.create-lobby-form {
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid var(--sa-green);
+  border-radius: 10px;
+  padding: 25px;
+  margin-bottom: 25px;
+  backdrop-filter: blur(5px);
+}
+
+.create-lobby-form h3 {
+  font-family: 'Pricedown', sans-serif;
+  font-size: 1.5rem;
+  color: var(--sa-gold);
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+  margin-bottom: 20px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.form-row {
+  margin-bottom: 15px;
+}
+
+.form-row label {
+  display: block;
+  color: var(--sa-sand);
+  font-weight: bold;
+  margin-bottom: 5px;
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+}
+
+.form-row input, .form-row select {
+  width: 100%;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid var(--sa-green);
+  border-radius: 6px;
+  color: var(--sa-sand);
+  font-size: 1rem;
+}
+
+.form-row input:focus, .form-row select:focus {
+  outline: none;
+  border-color: var(--sa-gold);
+  box-shadow: 0 0 10px rgba(144, 98, 16, 0.3);
+}
+
+.form-summary {
+  background: rgba(54, 104, 44, 0.2);
+  border: 1px solid var(--sa-green);
+  border-radius: 6px;
+  padding: 15px;
+  margin: 15px 0;
+  text-align: center;
+}
+
+.form-summary p {
+  margin: 0;
+  color: var(--sa-sand);
+  font-size: 1.1rem;
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+}
+
+.form-actions {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.submit-button {
+  background: linear-gradient(145deg, var(--sa-gold), #6b5b2f);
+  border: 2px solid var(--sa-sand);
+  color: var(--sa-shadow);
+  padding: 15px 40px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-button:hover {
+  background: linear-gradient(145deg, var(--sa-sand), #c4c4c4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+}
+
+.lobby-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.no-lobbies {
+  text-align: center;
+  padding: 40px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px dashed var(--sa-green);
+  border-radius: 10px;
+}
+
+.no-lobbies p {
+  font-size: 1.2rem;
+  color: var(--sa-sand);
+  margin-bottom: 10px;
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+}
+
+.no-lobbies small {
+  color: var(--sa-sand);
+  opacity: 0.8;
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+}
+
+.lobby-card {
+  background: linear-gradient(145deg, rgba(54, 104, 44, 0.3), rgba(82, 62, 45, 0.3));
+  border: 2px solid var(--sa-green);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(3px);
+}
+
+.lobby-card:hover {
+  border-color: var(--sa-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.lobby-card.in-game {
+  border-color: var(--sa-red);
+  opacity: 0.7;
+}
+
+.lobby-card.full {
+  border-color: var(--sa-gold);
+}
+
+.lobby-info {
+  flex: 1;
+}
+
+.lobby-name {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: var(--sa-sand);
+  margin-bottom: 8px;
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+}
+
+.lobby-details {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 5px;
+  flex-wrap: wrap;
+}
+
+.lobby-details span {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: var(--sa-sand);
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+}
+
+.lobby-meta {
+  display: flex;
+  gap: 15px;
+  font-size: 0.8rem;
+  color: var(--sa-sand);
+  opacity: 0.8;
+}
+
+.lobby-actions .join-button {
+  background: linear-gradient(145deg, var(--sa-green), #2d5016);
+  border: 2px solid var(--sa-gold);
+  color: var(--sa-sand);
+  padding: 12px 24px;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+  min-width: 80px;
+}
+
+.lobby-actions .join-button:hover:not(.disabled) {
+  background: linear-gradient(145deg, var(--sa-gold), #6b5b2f);
+  transform: translateY(-2px);
+}
+
+.lobby-actions .join-button.disabled {
+  background: rgba(100, 100, 100, 0.3);
+  border-color: rgba(100, 100, 100, 0.5);
+  color: rgba(225, 225, 225, 0.5);
+  cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .lobby-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .lobby-actions {
+    justify-content: center;
+  }
+
+  .lobby-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .lobby-details {
+    justify-content: center;
+  }
+
+  .lobby-meta {
+    justify-content: center;
+  }
+}

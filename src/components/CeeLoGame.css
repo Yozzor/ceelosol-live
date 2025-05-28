@@ -1,0 +1,177 @@
+/* CeeLo Game Styles with GTA San Andreas Theme */
+
+.ceelo-game {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.95), rgba(45, 45, 45, 0.95));
+  border: 3px solid var(--sa-green, #36682c);
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Game Title */
+.game-title h2 {
+  font-family: 'Pricedown', Arial, sans-serif;
+  font-size: 2.5rem;
+  color: var(--sa-green, #36682c);
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+  margin-bottom: 0.5rem;
+  letter-spacing: 3px;
+}
+
+.rules-summary {
+  font-size: 0.9rem;
+  color: var(--sa-sand, #e1e1e1);
+  margin-bottom: 2rem;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border: 1px solid var(--sa-green, #36682c);
+}
+
+/* Dice Container - REAL 3D CUBES */
+.dice-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 3rem 0;
+  min-height: 250px;
+  perspective: 1000px;
+  perspective-origin: center center;
+}
+
+/* 3D Dice styling is now handled in Dice3D.css */
+
+/* Controls */
+.controls {
+  margin: 2rem 0;
+}
+
+.roll-button {
+  background: linear-gradient(135deg, var(--sa-green, #36682c), #4a8a3a);
+  color: white;
+  border: 3px solid #2a5221;
+  border-radius: 12px;
+  padding: 15px 50px;
+  font-family: 'Pricedown', Arial, sans-serif;
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  min-width: 250px;
+}
+
+.roll-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4a8a3a, var(--sa-green, #36682c));
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+.roll-button:active:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.roll-button:disabled {
+  background: #666;
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+}
+
+/* Game Result */
+.game-result {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  font-family: 'Pricedown', Arial, sans-serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  animation: resultSlideIn 0.6s ease-out;
+  border: 3px solid;
+}
+
+.game-result.win {
+  background: linear-gradient(135deg, var(--sa-green, #36682c), #4a8a3a);
+  color: white;
+  border-color: #2a5221;
+  box-shadow: 0 0 25px rgba(54, 104, 44, 0.6);
+}
+
+.game-result.lose {
+  background: linear-gradient(135deg, var(--sa-red, #b4191d), #d42429);
+  color: white;
+  border-color: #8a1317;
+  box-shadow: 0 0 25px rgba(180, 25, 29, 0.6);
+}
+
+.game-result.point,
+.game-result.reroll {
+  background: linear-gradient(135deg, var(--sa-gold, #906210), #b8791a);
+  color: white;
+  border-color: #6b4a0c;
+  box-shadow: 0 0 25px rgba(144, 98, 16, 0.6);
+}
+
+.result-message {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: 2px;
+}
+
+.dice-display {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+/* Roll Counter */
+.roll-counter {
+  margin-top: 1rem;
+  color: var(--sa-sand, #e1e1e1);
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+@keyframes resultSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ceelo-game {
+    padding: 1rem;
+    margin: 1rem;
+  }
+
+  .dice-container {
+    gap: 2rem;
+    min-height: 100px;
+  }
+
+  .game-title h2 {
+    font-size: 2rem;
+  }
+
+  .roll-button {
+    padding: 12px 30px;
+    font-size: 1.5rem;
+    min-width: 200px;
+  }
+
+  .result-message {
+    font-size: 1.5rem;
+  }
+}

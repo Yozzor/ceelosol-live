@@ -1,0 +1,200 @@
+/* TauntNotification.css - GTA San Andreas inspired taunt notification styling */
+
+.taunt-notification {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 1500;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+}
+
+.taunt-notification.visible {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.taunt-notification-content {
+  background: linear-gradient(145deg, rgba(0, 0, 0, 0.95), rgba(144, 98, 16, 0.2));
+  border: 2px solid var(--sa-gold);
+  border-radius: 10px;
+  padding: 15px 20px;
+  min-width: 280px;
+  max-width: 350px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  animation: tauntPulse 0.6s ease-out;
+}
+
+.taunt-notification.own-taunt .taunt-notification-content {
+  background: linear-gradient(145deg, rgba(0, 0, 0, 0.95), rgba(54, 104, 44, 0.2));
+  border-color: var(--sa-green);
+}
+
+@keyframes tauntPulse {
+  0% { 
+    transform: scale(0.8);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  }
+  50% { 
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(144, 98, 16, 0.4);
+  }
+  100% { 
+    transform: scale(1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  }
+}
+
+.taunt-notification.own-taunt .taunt-notification-content {
+  animation: ownTauntPulse 0.6s ease-out;
+}
+
+@keyframes ownTauntPulse {
+  0% { 
+    transform: scale(0.8);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  }
+  50% { 
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(54, 104, 44, 0.4);
+  }
+  100% { 
+    transform: scale(1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* Header */
+.taunt-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.taunt-icon {
+  font-size: 1.3rem;
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-4px); }
+  60% { transform: translateY(-2px); }
+}
+
+.taunt-title {
+  font-family: 'Pricedown', sans-serif;
+  font-size: 1.1rem;
+  color: var(--sa-gold);
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+  letter-spacing: 1px;
+}
+
+.taunt-notification.own-taunt .taunt-title {
+  color: var(--sa-green);
+}
+
+/* Details */
+.taunt-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.taunt-player {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.player-you {
+  font-weight: bold;
+  color: var(--sa-green);
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+  font-size: 0.95rem;
+}
+
+.taunt-sound {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sound-label {
+  font-size: 0.8rem;
+  color: var(--sa-sand);
+  opacity: 0.8;
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+}
+
+.sound-name {
+  font-weight: bold;
+  color: var(--sa-gold);
+  font-size: 0.95rem;
+  text-shadow: 1px 1px 2px var(--sa-shadow);
+  font-style: italic;
+}
+
+.taunt-notification.own-taunt .sound-name {
+  color: var(--sa-green);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .taunt-notification {
+    top: 60px;
+    right: 10px;
+    left: 10px;
+    transform: translateY(-100%);
+  }
+  
+  .taunt-notification.visible {
+    transform: translateY(0);
+  }
+  
+  .taunt-notification-content {
+    min-width: auto;
+    max-width: none;
+    padding: 12px 15px;
+  }
+  
+  .taunt-title {
+    font-size: 1rem;
+  }
+  
+  .sound-name {
+    font-size: 0.9rem;
+  }
+}
+
+/* Multiple notifications stacking */
+.taunt-notification:nth-child(2) {
+  top: 160px;
+}
+
+.taunt-notification:nth-child(3) {
+  top: 240px;
+}
+
+.taunt-notification:nth-child(4) {
+  top: 320px;
+}
+
+@media (max-width: 768px) {
+  .taunt-notification:nth-child(2) {
+    top: 140px;
+  }
+  
+  .taunt-notification:nth-child(3) {
+    top: 220px;
+  }
+  
+  .taunt-notification:nth-child(4) {
+    top: 300px;
+  }
+}

@@ -1,0 +1,183 @@
+:root {
+  --sa-green: #36682c;
+  --sa-red: #b4191d;
+  --sa-sand: #e1e1e1;
+  --sa-blue: #accbf1;
+  --sa-gold: #906210;
+
+  /* Gritty street colors */
+  --street-gray: #2a2a2a;
+  --street-dark: #1a1a1a;
+  --street-rust: #8b4513;
+  --street-dirty: #4a4a3a;
+  --street-cash: #2d5016;
+  --street-danger: #722f37;
+  --street-warning: #6b5b2f;
+}
+
+/* Import Google Fonts for better GTA-style typography */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Anton&display=swap');
+
+/* GTA-style font using Google Fonts */
+/* Apply GTA styling only to main titles (h1) */
+h1 {
+  font-family: 'Anton', 'Oswald', 'Impact', 'Arial Black', 'Franklin Gothic Bold', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--sa-sand);
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.9);
+  font-size: 2.5rem;
+  font-weight: 400; /* Anton is already bold */
+}
+
+/* Make other headings readable and modern */
+h2, h3, h4, h5, h6 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-weight: 600;
+  color: var(--sa-sand);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* Body text and general content */
+p, span, div, label, input, button {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+/* Apply GTA colors to various elements */
+.btn-primary {
+  background-color: var(--sa-blue) !important;
+  border-color: var(--sa-blue) !important;
+}
+
+.btn-secondary {
+  background-color: var(--sa-green) !important;
+  border-color: var(--sa-green) !important;
+}
+
+.btn-danger {
+  background-color: var(--sa-red) !important;
+  border-color: var(--sa-red) !important;
+}
+
+/* Game result styling */
+.game-result.win {
+  border-left-color: var(--sa-green) !important;
+  background-color: rgba(54, 104, 44, 0.1) !important;
+}
+
+.game-result.lose {
+  border-left-color: var(--sa-red) !important;
+  background-color: rgba(180, 25, 29, 0.1) !important;
+}
+
+.profit-positive {
+  color: var(--sa-green) !important;
+}
+
+.profit-negative {
+  color: var(--sa-red) !important;
+}
+
+/* Card styling */
+.card-header {
+  background-color: var(--sa-green) !important;
+  color: var(--sa-sand) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-weight: 600;
+  border-radius: 8px 8px 0 0;
+}
+
+/* Balance display */
+.balance-display {
+  color: var(--sa-gold) !important;
+}
+
+/* Modern navbar */
+.navbar-brand a {
+  font-family: 'Impact', 'Arial Black', 'Franklin Gothic Bold', sans-serif !important;
+  font-size: 2rem !important;
+  color: var(--sa-sand) !important;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.9);
+  font-weight: 900 !important;
+  letter-spacing: 1px !important;
+}
+
+/* Navigation links */
+.nav-link {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif !important;
+  font-weight: 500 !important;
+  color: var(--sa-sand) !important;
+}
+
+.nav-link:hover {
+  color: var(--sa-gold) !important;
+}
+
+/* Background styling */
+body {
+  background-color: #222 !important;
+  color: var(--sa-sand) !important;
+}
+
+/* Dice styling */
+.dice {
+  background-color: var(--sa-sand);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Improved card styling */
+.bg-half-transparent {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+}
+
+.sr-border {
+  border: 2px solid var(--sa-green);
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(54, 104, 44, 0.3);
+}
+
+/* Button improvements */
+.btn {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Input styling */
+.form-control {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: var(--sa-sand);
+}
+
+.form-control:focus {
+  border-color: var(--sa-gold);
+  box-shadow: 0 0 0 0.2rem rgba(144, 98, 16, 0.25);
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Typography improvements */
+.text-white {
+  color: var(--sa-sand) !important;
+}
+
+/* Game result styling improvements */
+.game-result {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-left: 4px solid transparent;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}

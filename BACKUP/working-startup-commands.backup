@@ -1,0 +1,59 @@
+# 🏆 WORKING STARTUP COMMANDS - GOLDEN BACKUP
+
+## ✅ CONFIRMED WORKING METHOD
+
+### Backend Startup (WORKING)
+```powershell
+cd backend; pnpm build; node dist/server.js
+```
+
+**Expected Output:**
+```
+> ceelosol-backend@1.0.0 build C:\Users\Dragos\Documents\augment-projects\CeeloSol\backend
+> tsc
+
+bigint: Failed to load bindings, pure JS will be used (try npm run rebuild?)
+🎮 Setting up lobby handlers...
+Server running on port 3001
+Socket.io enabled for PVP lobbies
+```
+
+### Frontend Startup (WORKING)
+```powershell
+# From root directory
+pnpm dev
+```
+
+**Expected Output:**
+```
+> ceelosol@0.1.0 dev C:\Users\Dragos\Documents\augment-projects\CeeloSol
+> react-app-rewired start
+
+Compiled successfully!
+```
+
+## 🚨 CRITICAL NOTES
+
+1. **Backend MUST start first** - Frontend depends on backend API
+2. **Use PowerShell semicolon syntax** - This keeps the server process alive
+3. **Don't use batch files** - They have encoding/execution issues
+4. **Terminal 234 is the working backend process** - Don't kill it!
+
+## 🔧 TROUBLESHOOTING
+
+If backend won't start:
+1. Kill all Node processes: `taskkill /F /IM node.exe`
+2. Clean build: `cd backend && rm -rf dist/ && pnpm build`
+3. Use exact command: `cd backend; pnpm build; node dist/server.js`
+
+## 🎯 VERIFICATION
+
+Backend working when you see:
+- "Server running on port 3001"
+- "Socket.io enabled for PVP lobbies"
+- "🎮 Setting up lobby handlers..."
+
+Frontend working when you see:
+- "Compiled successfully!"
+- No Socket.IO connection errors in browser console
+- Game loads at http://localhost:3000

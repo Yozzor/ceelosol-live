@@ -1,0 +1,58 @@
+.game-result {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border-left: 4px solid transparent;
+}
+
+.game-result.win {
+  border-left-color: #4caf50;
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.game-result.lose {
+  border-left-color: #f44336;
+  background-color: rgba(244, 67, 54, 0.1);
+}
+
+.game-result.point {
+  border-left-color: #2196f3;
+  background-color: rgba(33, 150, 243, 0.1);
+}
+
+.game-result.reroll {
+  border-left-color: #ff9800;
+  background-color: rgba(255, 152, 0, 0.1);
+}
+
+.profit-positive {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.profit-negative {
+  color: #f44336;
+  font-weight: bold;
+}
+
+.balance-display {
+  font-size: 1.2rem;
+  font-weight: bold;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.balance-updating {
+  animation: pulse 1s infinite;
+}

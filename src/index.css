@@ -1,0 +1,133 @@
+:root {
+  /* GTA SA HUD */
+  --sa-green:#36682c;
+  --sa-red:#b4191d;
+  --sa-sand:#e1e1e1;
+  --sa-gold:#906210;
+  --sa-shadow:#000000b0;
+  --board-brown:#523e2d;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  color: var(--sa-sand);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("./assets/ceelobg1.jpg");
+  background-color: #1a1a1a;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+nav {
+  height: 85px;
+}
+
+/* Logo styling */
+.navbar-brand {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.navbar-brand img {
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
+  transition: transform 0.3s ease;
+}
+
+.navbar-brand img:hover {
+  transform: scale(1.05);
+}
+
+.nav-menu-sr {
+  z-index:999;
+  background-color: black;
+  padding: 5px;
+}
+
+.bg-transparent {
+  background-color: transparent;
+}
+
+.bg-half-transparent {
+  background-color: rgba(0,0,0,0.85);
+}
+
+.bg-black {
+  background-color: black;
+}
+
+.sr-border {
+  border: 2px solid var(--sa-green);
+  border-radius: 0.5rem;
+  box-shadow: 0 0 15px rgba(54, 104, 44, 0.5);
+}
+
+.text-sr {
+  font-size: 28px;
+  font-weight: 900;
+  font-family: 'Impact', 'Arial Black', 'Franklin Gothic Bold', sans-serif;
+  color: var(--sa-sand);
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.9);
+  letter-spacing: 1px;
+}
+
+.text-sr:hover {
+  text-decoration: none;
+  color: var(--sa-gold) !important;
+  font-weight: 900;
+}
+
+.sr-nav-text-1 {
+  font-size: 18px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  color: var(--sa-green) !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+}
+.sr-nav-text-2 {
+  font-size: 18px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  color: var(--sa-red) !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+@media(max-width: 991px){
+  .sr-border-sm {
+    border: 2px solid var(--sa-green);
+    border-radius: 0.5rem;
+    box-shadow: 0 0 10px rgba(54, 104, 44, 0.5);
+  }
+}
+
+@media(max-width: 1201px){
+  body {
+    background-size: 1100px 600px;
+  }
+}
+
+.btn-dark-custom {
+  background-color: #222222;
+  border: 2px solid #222222;
+  color: #d3d3d3;
+}
+
+.btn-dark-custom:hover {
+  background-color: #343434;
+  border: 2px solid rgba(0, 0, 0, 0.88);
+  color: #d3d3d3;
+}
+
+.game {
+  display: flex;
+  flex-direction: row;
+}

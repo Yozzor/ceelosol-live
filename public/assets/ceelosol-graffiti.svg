@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="300" height="80" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .title {
+      font-family: Impact, sans-serif;
+      font-size: 48px;
+      font-weight: bold;
+      text-transform: uppercase;
+      fill: #e1e1e1;
+      stroke: #000;
+      stroke-width: 1px;
+    }
+    .subtitle {
+      font-family: Impact, sans-serif;
+      font-size: 24px;
+      font-style: italic;
+      fill: #906210;
+    }
+  </style>
+  <text x="10" y="50" class="title">CEELO<tspan class="subtitle">SOL</tspan></text>
+</svg>

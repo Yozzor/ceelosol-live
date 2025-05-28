@@ -19,9 +19,24 @@ const app = express();
 const server = createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:3002"],
-    methods: ["GET", "POST"]
-  }
+    origin: process.env.NODE_ENV === 'production'
+      ? [
+          "https://ceelosol-live.onrender.com",
+          "https://ceelosol.com",
+          "https://www.ceelosol.com",
+          "http://localhost:3000",
+          "http://localhost:3002"
+        ]
+      : ["http://localhost:3000", "http://localhost:3002"],
+    methods: ["GET", "POST"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"]
+  },
+  // Production-optimized Socket.io settings
+  pingTimeout: process.env.NODE_ENV === 'production' ? 120000 : 60000,
+  pingInterval: process.env.NODE_ENV === 'production' ? 30000 : 25000,
+  transports: ['polling', 'websocket'],
+  allowEIO3: true
 });
 
 const PORT = process.env.PORT || 3001;
@@ -30,10 +45,16 @@ const PORT = process.env.PORT || 3001;
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production'
     ? [
-        process.env.ALLOWED_ORIGINS?.split(',') || [],
+        "https://ceelosol-live.onrender.com",
+        "https://ceelosol.com",
+        "https://www.ceelosol.com",
+        "http://localhost:3000",
+        "http://localhost:3002",
+        ...(process.env.ALLOWED_ORIGINS?.split(',') || []),
         /\.railway\.app$/,
         /\.namecheap\.com$/,
-        /\.namecheaphosting\.com$/
+        /\.namecheaphosting\.com$/,
+        /\.onrender\.com$/
       ].flat()
     : ['http://localhost:3000', 'http://127.0.0.1:3000'],
   credentials: true,
@@ -97,8 +118,16 @@ process.on('SIGTERM', () => {
 
 // Start server
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Socket.io enabled for PVP lobbies`);
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🎮 Socket.io enabled for PVP lobbies`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 CORS origins configured for Socket.io:`,
+    process.env.NODE_ENV === 'production'
+      ? ["https://ceelosol-live.onrender.com", "https://ceelosol.com", "https://www.ceelosol.com"]
+      : ["http://localhost:3000", "http://localhost:3002"]
+  );
+  console.log(`⚡ Socket.io transports: polling, websocket`);
+  console.log(`📡 Socket.io ping settings: timeout=${process.env.NODE_ENV === 'production' ? '120s' : '60s'}, interval=${process.env.NODE_ENV === 'production' ? '30s' : '25s'}`);
 });
 
 export default app;

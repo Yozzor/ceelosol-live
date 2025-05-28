@@ -121,7 +121,7 @@ export function LobbyBrowser({ onBackToModeSelect, onJoinLobby }) {
     }
   }, [effectivePublicKey, onJoinLobby]);
 
-  const handleCreateLobby = (e) => {
+    const handleCreateLobby = (e) => {
     e.preventDefault();
 
     if (!createForm.name.trim()) {
@@ -129,13 +129,19 @@ export function LobbyBrowser({ onBackToModeSelect, onJoinLobby }) {
       return;
     }
 
+    // Debug connection status before creating lobby
+    const connectionStatus = socketService.getConnectionStatus();
+    console.log('🔍 Connection status before creating lobby:', connectionStatus);
+    console.log('🔍 Detailed connection info:', socketService.getDetailedConnectionInfo());
+
     const lobbyData = {
       ...createForm,
       walletAddress: effectivePublicKey
     };
 
     console.log('🏠 Creating lobby with data:', lobbyData);
-    socketService.createLobby(lobbyData);
+    const result = socketService.createLobby(lobbyData);
+    console.log('🏠 Create lobby result:', result);
   };
 
   const handleJoinLobby = (lobby) => {

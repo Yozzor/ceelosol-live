@@ -51,7 +51,14 @@ class SocketService {
 
     // Silently attempt connection
 
-    this.socket = io(API_CONFIG.SOCKET_URL, {
+    // Force production URL for immediate fix
+    const socketUrl = process.env.NODE_ENV === 'production'
+      ? 'https://ceelosol-backend.onrender.com'
+      : API_CONFIG.SOCKET_URL;
+
+    console.log('🔌 Connecting to socket URL:', socketUrl);
+
+    this.socket = io(socketUrl, {
       transports: ['websocket', 'polling'],
       timeout: 10000,
       forceNew: true,

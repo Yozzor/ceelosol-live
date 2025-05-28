@@ -57,10 +57,16 @@ class SocketService {
 
     // Silently attempt connection
 
-    // Force production URL for immediate fix
-    const socketUrl = process.env.NODE_ENV === 'production'
-      ? 'https://ceelosol-backend.onrender.com'
-      : API_CONFIG.SOCKET_URL;
+    // Force production URL for immediate fix with fallback
+    let socketUrl;
+    if (process.env.NODE_ENV === 'production') {
+      // Try primary backend URL first
+      socketUrl = 'https://ceelosol-backend.onrender.com';
+      console.log('🔌 Production mode: Using backend URL:', socketUrl);
+    } else {
+      socketUrl = API_CONFIG.SOCKET_URL;
+      console.log('🔌 Development mode: Using local URL:', socketUrl);
+    }
 
     const isMobileDevice = this.isMobile();
     console.log('🔌 Connecting to socket URL:', socketUrl, 'Mobile:', isMobileDevice);
@@ -86,7 +92,22 @@ class SocketService {
 
     this.socket = io(socketUrl, socketConfig);
 
+    // Add connection timeout detection
+    const connectionTimeout = setTimeout(() => {
+      if (this.isConnecting && !this.isConnected) {
+        console.error('🕐 Socket connection timeout after 30 seconds to:', socketUrl);
+        console.log('🔧 Attempting to force reconnect...');
+        if (this.socket) {
+          this.socket.disconnect();
+          this.socket.connect();
+        }
+      }
+    }, 30000);
+
     this.socket.on('connect', () => {
+      // Clear connection timeout
+      clearTimeout(connectionTimeout);
+
       // Silently handle successful connection
       this.isConnected = true;
       this.isConnecting = false;
@@ -140,8 +161,13 @@ class SocketService {
         type: error.type,
         description: error.description,
         context: error.context,
-        transport: error.transport
+        transport: error.transport,
+        url: socketUrl,
+        timestamp: new Date().toISOString()
       });
+
+      // Log specific error for debugging
+      console.error('❌ Socket connection failed to:', socketUrl, error);
 
       this.isConnected = false;
       this.isConnecting = false;

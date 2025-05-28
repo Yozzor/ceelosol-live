@@ -10,6 +10,7 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const http_1 = require("http");
 const socket_io_1 = require("socket.io");
+const path_1 = __importDefault(require("path"));
 const start_1 = require("./routes/start");
 const reveal_1 = require("./routes/reveal");
 const settle_1 = require("./routes/settle");
@@ -42,6 +43,8 @@ const corsOptions = {
 // Middleware
 app.use((0, cors_1.default)(corsOptions));
 app.use(express_1.default.json());
+// Serve static files from the React app build
+app.use(express_1.default.static(path_1.default.join(__dirname, '../public')));
 // Existing REST API Routes (PRESERVED)
 app.post('/api/start', start_1.startHandler);
 app.post('/api/reveal', reveal_1.revealHandler);
@@ -54,6 +57,10 @@ app.get('/api/activity/result/:signature', activity_1.getGameResult);
 app.get('/api/activity/stats', activity_1.getActivityStats);
 // Socket.io setup for PVP lobbies
 (0, lobbyHandlers_1.setupLobbyHandlers)(io);
+// Catch all handler: send back React's index.html file for any non-API routes
+app.get('*', (req, res) => {
+    res.sendFile(path_1.default.join(__dirname, '../public/index.html'));
+});
 // Error handling for server
 server.on('error', (error) => {
     if (error.code === 'EADDRINUSE') {

@@ -7,6 +7,7 @@ import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
+import path from 'path';
 import { startHandler } from './routes/start';
 import { revealHandler } from './routes/reveal';
 import { settleHandler } from './routes/settle';
@@ -44,6 +45,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Serve static files from the React app build
+app.use(express.static(path.join(__dirname, '../public')));
+
 // Existing REST API Routes (PRESERVED)
 app.post('/api/start', startHandler);
 app.post('/api/reveal', revealHandler);
@@ -58,6 +62,11 @@ app.get('/api/activity/stats', getActivityStats);
 
 // Socket.io setup for PVP lobbies
 setupLobbyHandlers(io);
+
+// Catch all handler: send back React's index.html file for any non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 // Error handling for server
 server.on('error', (error: any) => {

@@ -98,7 +98,7 @@ io.on('connection', (socket) => {
     socket.emit('lobbies:list', Array.from(lobbies.values()));
   });
 
-    socket.on('lobby:create', (data) => {
+      socket.on('lobby:create', (data) => {
     const lobbyId = Date.now().toString();
     const lobby = {
       id: lobbyId,
@@ -106,10 +106,19 @@ io.on('connection', (socket) => {
       maxPlayers: data.maxPlayers || 4,
       betAmount: data.betAmount || 0.1,
       rounds: data.rounds || 3,
-      players: [],
+      players: [{
+        id: data.walletAddress,
+        walletAddress: data.walletAddress,
+        socketId: socket.id,
+        isReady: false,
+        hasPaid: false,
+        nickname: data.nickname || undefined
+      }],
       status: 'waiting'
     };
     lobbies.set(lobbyId, lobby);
+    socket.join(lobbyId);
+    console.log(`🏠 Lobby created: ${lobbyId} by ${data.walletAddress}`);
     socket.emit('lobby:created', { lobbyId, lobby });
     io.emit('lobbies:list', Array.from(lobbies.values()));
   });

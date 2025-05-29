@@ -412,7 +412,7 @@ class SocketService {
     return true;
   }
 
-  joinLobby(lobbyId, walletAddress) {
+    joinLobby(lobbyId, walletAddress) {
     if (!this.isConnected) {
       console.error('❌ Not connected to server');
       return false;
@@ -423,12 +423,26 @@ class SocketService {
     const profile = profileService.getProfile(walletAddress);
     const nickname = profile?.nickname?.trim() || null;
 
-    console.log(`👥 Joining lobby ${lobbyId}`);
-    this.socket.emit('lobby:join', {
+    // DEBUG: Log detailed join data
+    const joinData = {
       lobbyId,
       walletAddress,
       nickname: nickname
+    };
+
+    console.log(`👥 Joining lobby ${lobbyId}`);
+    console.log(`🔍 FRONTEND JOIN DATA:`, {
+      lobbyId,
+      walletAddress,
+      nickname,
+      walletAddressType: typeof walletAddress,
+      walletAddressLength: walletAddress?.length,
+      isValidWallet: walletAddress && walletAddress.length > 0,
+      profile: profile ? 'found' : 'not found',
+      joinDataKeys: Object.keys(joinData)
     });
+
+    this.socket.emit('lobby:join', joinData);
     return true;
   }
 

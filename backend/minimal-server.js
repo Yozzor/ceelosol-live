@@ -98,7 +98,7 @@ io.on('connection', (socket) => {
     socket.emit('lobbies:list', Array.from(lobbies.values()));
   });
 
-  socket.on('lobby:create', (data) => {
+    socket.on('lobby:create', (data) => {
     const lobbyId = Date.now().toString();
     const lobby = {
       id: lobbyId,

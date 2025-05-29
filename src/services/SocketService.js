@@ -24,18 +24,24 @@ class SocketService {
 
   // Transform backend lobby data to frontend format
   transformLobbyData(backendLobby) {
+    // Handle both backend formats: some send betAmount directly, others send difficulty
+    const betAmount = backendLobby.betAmount || (backendLobby.difficulty === 'easy' ? 0.1 : 0.5);
+    const rounds = backendLobby.rounds || backendLobby.totalRounds || 1;
+    const difficulty = backendLobby.difficulty || (betAmount === 0.1 ? 'easy' : 'medium');
+    const totalRounds = backendLobby.totalRounds || backendLobby.rounds || 1;
+    
     return {
       ...backendLobby,
       // Ensure players array exists
       players: backendLobby.players || [],
-      // Map backend fields to frontend expectations
-      betAmount: backendLobby.difficulty === 'easy' ? 0.1 : 0.5,
-      rounds: backendLobby.totalRounds || backendLobby.rounds || 1,
-      // Preserve all original fields
-      difficulty: backendLobby.difficulty,
-      totalRounds: backendLobby.totalRounds,
-      status: backendLobby.status,
-      treasuryAddress: backendLobby.treasuryAddress
+      // Use calculated values with fallbacks
+      betAmount: betAmount,
+      rounds: rounds,
+      difficulty: difficulty,
+      totalRounds: totalRounds,
+      // Preserve other fields
+      status: backendLobby.status || 'waiting',
+      treasuryAddress: backendLobby.treasuryAddress || 'GMAuqtZuYpwt3Y9EUeeEfQFJGDpsExWXG1ZegGBQwAW6'
     };
   }
 

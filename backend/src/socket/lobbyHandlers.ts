@@ -135,55 +135,91 @@ export function setupLobbyHandlers(io: SocketIOServer) {
       io.emit('lobbies:list', Array.from(lobbies.values()));
     });
 
-    // Handle joining lobby
+        // Handle joining lobby
     socket.on('lobby:join', (data: { lobbyId: string; walletAddress: string; nickname?: string }) => {
       const { lobbyId, walletAddress, nickname } = data;
+      
+      // DEBUG: Log all received data
+      console.log(`🔍 LOBBY JOIN REQUEST:`, {
+        lobbyId,
+        walletAddress,
+        nickname,
+        socketId: socket.id,
+        dataType: typeof data,
+        dataKeys: Object.keys(data || {}),
+        walletAddressType: typeof walletAddress,
+        walletAddressLength: walletAddress?.length
+      });
+
       const lobby = lobbies.get(lobbyId);
 
       if (!lobby) {
+        console.log(`❌ LOBBY NOT FOUND: ${lobbyId}`);
         socket.emit('error', { message: 'Lobby not found' });
         return;
       }
 
+      console.log(`🔍 LOBBY FOUND:`, {
+        id: lobby.id,
+        status: lobby.status,
+        currentPlayers: lobby.players.length,
+        maxPlayers: lobby.maxPlayers,
+        playerWallets: lobby.players.map(p => p.walletAddress)
+      });
+
       if (lobby.status !== 'waiting') {
+        console.log(`❌ LOBBY NOT WAITING: status=${lobby.status}`);
         socket.emit('error', { message: 'Lobby is not accepting players' });
         return;
       }
 
       if (lobby.players.length >= lobby.maxPlayers) {
+        console.log(`❌ LOBBY FULL: ${lobby.players.length}/${lobby.maxPlayers}`);
         socket.emit('error', { message: 'Lobby is full' });
         return;
       }
 
       // Check if player already in lobby
-      if (lobby.players.some(p => p.walletAddress === walletAddress)) {
+      const existingPlayer = lobby.players.find(p => p.walletAddress === walletAddress);
+      if (existingPlayer) {
+        console.log(`❌ PLAYER ALREADY IN LOBBY:`, {
+          walletAddress,
+          existingPlayer: existingPlayer.walletAddress,
+          match: existingPlayer.walletAddress === walletAddress
+        });
         socket.emit('error', { message: 'Already in this lobby' });
         return;
       }
 
       // Add player to lobby
-      lobby.players.push({
+      const newPlayer = {
         id: walletAddress,
         walletAddress,
         socketId: socket.id,
         isReady: false,
         hasPaid: false,
         nickname: nickname || undefined
-      });
+      };
+
+      console.log(`✅ ADDING PLAYER TO LOBBY:`, newPlayer);
+      lobby.players.push(newPlayer);
 
       socket.join(lobbyId);
 
-      console.log(`👥 Player ${walletAddress} joined lobby ${lobbyId}`);
+      console.log(`👥 Player ${walletAddress} joined lobby ${lobbyId} - Players now: ${lobby.players.length}/${lobby.maxPlayers}`);
 
       // Update lobby status if full
       if (lobby.players.length === lobby.maxPlayers) {
         lobby.status = 'payment'; // Move to payment phase when lobby is full
+        console.log(`🔄 Lobby ${lobbyId} status changed to: ${lobby.status}`);
       }
 
       // Notify all players in lobby
+      console.log(`📡 Emitting lobby:updated to room ${lobbyId} with ${lobby.players.length} players`);
       io.to(lobbyId).emit('lobby:updated', lobby);
 
       // Broadcast updated lobby list
+      console.log(`📡 Broadcasting updated lobby list to all clients`);
       io.emit('lobbies:list', Array.from(lobbies.values()));
     });
 

@@ -122,7 +122,46 @@ io.on('connection', (socket) => {
     socket.emit('lobby:created', { lobbyId, lobby });
     io.emit('lobbies:list', Array.from(lobbies.values()));
   });
+  socket.on('lobby:join', (data) => {
+    const lobby = lobbies.get(data.lobbyId);
+    if (!lobby) {
+      socket.emit('lobby:error', { message: 'Lobby not found' });
+      return;
+    }
 
+    if (lobby.players.length >= lobby.maxPlayers) {
+      socket.emit('lobby:error', { message: 'Lobby is full' });
+      return;
+    }
+
+    // Check if player is already in lobby
+    const existingPlayer = lobby.players.find(p => p.walletAddress === data.walletAddress);
+    if (existingPlayer) {
+      socket.emit('lobby:error', { message: 'Already in lobby' });
+      return;
+    }
+
+    // Add player to lobby
+    const newPlayer = {
+      id: data.walletAddress,
+      walletAddress: data.walletAddress,
+      socketId: socket.id,
+      isReady: false,
+      hasPaid: false,
+      nickname: data.nickname || undefined
+    };
+
+    lobby.players.push(newPlayer);
+    socket.join(data.lobbyId);
+    
+    console.log(`👤 Player ${data.walletAddress} joined lobby ${data.lobbyId}`);
+    
+    // Notify all clients
+    io.to(data.lobbyId).emit('lobby:playerJoined', { player: newPlayer, lobby });
+    io.emit('lobbies:list', Array.from(lobbies.values()));
+    
+    socket.emit('lobby:joined', { lobbyId: data.lobbyId, lobby });
+  });
   socket.on('disconnect', () => {
     console.log('🔌 Client disconnected:', socket.id);
   });

@@ -392,8 +392,25 @@ class SocketService {
 
   // Lobby methods
   createLobby(lobbyData) {
-    if (!this.isConnected) {
-      console.error('❌ Not connected to server');
+    // Enhanced connection check - check both internal state and socket state
+    const socketConnected = this.socket?.connected === true;
+    const isActuallyConnected = this.isConnected && socketConnected;
+
+    if (!isActuallyConnected) {
+      console.error('❌ Not connected to server - isConnected:', this.isConnected, 'socketConnected:', socketConnected);
+
+      // If socket is connected but internal state isn't updated, try a quick retry
+      if (socketConnected && !this.isConnected) {
+        console.log('🔄 Socket connected but internal state not updated, retrying in 100ms...');
+        setTimeout(() => {
+          if (this.socket?.connected) {
+            this.isConnected = true;
+            this.createLobby(lobbyData);
+          }
+        }, 100);
+        return true; // Return true to prevent error message
+      }
+
       return false;
     }
 
@@ -412,9 +429,26 @@ class SocketService {
     return true;
   }
 
-    joinLobby(lobbyId, walletAddress) {
-    if (!this.isConnected) {
-      console.error('❌ Not connected to server');
+  joinLobby(lobbyId, walletAddress) {
+    // Enhanced connection check - check both internal state and socket state
+    const socketConnected = this.socket?.connected === true;
+    const isActuallyConnected = this.isConnected && socketConnected;
+
+    if (!isActuallyConnected) {
+      console.error('❌ Not connected to server - isConnected:', this.isConnected, 'socketConnected:', socketConnected);
+
+      // If socket is connected but internal state isn't updated, try a quick retry
+      if (socketConnected && !this.isConnected) {
+        console.log('🔄 Socket connected but internal state not updated, retrying join in 100ms...');
+        setTimeout(() => {
+          if (this.socket?.connected) {
+            this.isConnected = true;
+            this.joinLobby(lobbyId, walletAddress);
+          }
+        }, 100);
+        return true; // Return true to prevent error message
+      }
+
       return false;
     }
 
@@ -506,6 +540,13 @@ class SocketService {
   getConnectionStatus() {
     const socketExists = !!this.socket;
     const socketConnected = this.socket?.connected === true;
+
+    // Auto-sync internal state if socket is connected but internal state is false
+    if (socketConnected && !this.isConnected && !this.isConnecting) {
+      console.log('🔄 Auto-syncing: Socket connected but internal state false, updating...');
+      this.isConnected = true;
+    }
+
     const finalStatus = this.isConnected && socketConnected && !this.isConnecting;
 
     const status = {
@@ -561,8 +602,25 @@ class SocketService {
 
   // Request current lobbies
   requestLobbies() {
-    if (!this.isConnected) {
-      console.error('❌ Not connected to server');
+    // Enhanced connection check - check both internal state and socket state
+    const socketConnected = this.socket?.connected === true;
+    const isActuallyConnected = this.isConnected && socketConnected;
+
+    if (!isActuallyConnected) {
+      console.error('❌ Not connected to server - isConnected:', this.isConnected, 'socketConnected:', socketConnected);
+
+      // If socket is connected but internal state isn't updated, try a quick retry
+      if (socketConnected && !this.isConnected) {
+        console.log('🔄 Socket connected but internal state not updated, retrying lobbies request in 100ms...');
+        setTimeout(() => {
+          if (this.socket?.connected) {
+            this.isConnected = true;
+            this.requestLobbies();
+          }
+        }, 100);
+        return true; // Return true to prevent error message
+      }
+
       return false;
     }
 

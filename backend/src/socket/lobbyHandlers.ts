@@ -225,8 +225,14 @@ export function setupLobbyHandlers(io: SocketIOServer) {
         // Emit to the room (all players already in the lobby)
         io.to(lobbyId).emit('lobby:updated', lobby);
 
-        // Also emit directly to the joining socket to ensure they get it
+        // Also emit directly to the joining socket to ensure they get it immediately
         socket.emit('lobby:updated', lobby);
+
+        // Additional immediate emit to ensure frontend receives the update
+        // This helps with race conditions in frontend event handling
+        setTimeout(() => {
+          socket.emit('lobby:updated', lobby);
+        }, 10);
 
         // Broadcast updated lobby list to all clients
         console.log(`📡 Broadcasting updated lobby list to all clients`);

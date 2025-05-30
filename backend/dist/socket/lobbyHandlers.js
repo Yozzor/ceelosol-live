@@ -122,6 +122,7 @@ function setupLobbyHandlers(io) {
             };
             console.log(`✅ ADDING PLAYER TO LOBBY:`, newPlayer);
             lobby.players.push(newPlayer);
+            // Join the socket room first
             socket.join(lobbyId);
             console.log(`👥 Player ${walletAddress} joined lobby ${lobbyId} - Players now: ${lobby.players.length}/${lobby.maxPlayers}`);
             // Update lobby status if full
@@ -129,14 +130,25 @@ function setupLobbyHandlers(io) {
                 lobby.status = 'payment'; // Move to payment phase when lobby is full
                 console.log(`🔄 Lobby ${lobbyId} status changed to: ${lobby.status}`);
             }
-            // Notify all players in lobby - emit to both the room AND directly to the joining socket
-            // This ensures the joining player receives the update even if socket.join() hasn't completed yet
-            console.log(`📡 Emitting lobby:updated to room ${lobbyId} with ${lobby.players.length} players`);
-            io.to(lobbyId).emit('lobby:updated', lobby);
-            socket.emit('lobby:updated', lobby); // Direct emit to joining socket
-            // Broadcast updated lobby list
-            console.log(`📡 Broadcasting updated lobby list to all clients`);
-            io.emit('lobbies:list', Array.from(lobbies.values()));
+            // Use setImmediate to ensure socket.join() completes before emitting
+            setImmediate(() => {
+                // Notify all players in lobby - emit to both the room AND directly to the joining socket
+                // This ensures the joining player receives the update even if socket.join() hasn't completed yet
+                console.log(`📡 Emitting lobby:updated to room ${lobbyId} with ${lobby.players.length} players`);
+                console.log(`📡 Players in lobby:`, lobby.players.map(p => `${p.walletAddress.substring(0, 8)}...${p.walletAddress.substring(p.walletAddress.length - 4)}`));
+                // Emit to the room (all players already in the lobby)
+                io.to(lobbyId).emit('lobby:updated', lobby);
+                // Also emit directly to the joining socket to ensure they get it immediately
+                socket.emit('lobby:updated', lobby);
+                // Additional immediate emit to ensure frontend receives the update
+                // This helps with race conditions in frontend event handling
+                setTimeout(() => {
+                    socket.emit('lobby:updated', lobby);
+                }, 10);
+                // Broadcast updated lobby list to all clients
+                console.log(`📡 Broadcasting updated lobby list to all clients`);
+                io.emit('lobbies:list', Array.from(lobbies.values()));
+            });
         });
         // Handle leaving lobby
         socket.on('lobby:leave', (data) => {

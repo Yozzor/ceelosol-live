@@ -1,5 +1,20 @@
 services:
   - type: web
+    name: ceelosol-backend
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node minimal-server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: SOLANA_RPC_URL
+        value: https://api.mainnet-beta.solana.com
+      - key: HOUSE_EDGE
+        value: 0.03
+
+  - type: web
     name: ceelosol-frontend
     env: static
     buildCommand: npm install && npm run build

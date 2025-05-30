@@ -129,9 +129,11 @@ function setupLobbyHandlers(io) {
                 lobby.status = 'payment'; // Move to payment phase when lobby is full
                 console.log(`🔄 Lobby ${lobbyId} status changed to: ${lobby.status}`);
             }
-            // Notify all players in lobby
+            // Notify all players in lobby - emit to both the room AND directly to the joining socket
+            // This ensures the joining player receives the update even if socket.join() hasn't completed yet
             console.log(`📡 Emitting lobby:updated to room ${lobbyId} with ${lobby.players.length} players`);
             io.to(lobbyId).emit('lobby:updated', lobby);
+            socket.emit('lobby:updated', lobby); // Direct emit to joining socket
             // Broadcast updated lobby list
             console.log(`📡 Broadcasting updated lobby list to all clients`);
             io.emit('lobbies:list', Array.from(lobbies.values()));

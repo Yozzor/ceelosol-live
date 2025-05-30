@@ -204,6 +204,7 @@ export function setupLobbyHandlers(io: SocketIOServer) {
       console.log(`✅ ADDING PLAYER TO LOBBY:`, newPlayer);
       lobby.players.push(newPlayer);
 
+      // Join the socket room first
       socket.join(lobbyId);
 
       console.log(`👥 Player ${walletAddress} joined lobby ${lobbyId} - Players now: ${lobby.players.length}/${lobby.maxPlayers}`);
@@ -214,15 +215,23 @@ export function setupLobbyHandlers(io: SocketIOServer) {
         console.log(`🔄 Lobby ${lobbyId} status changed to: ${lobby.status}`);
       }
 
-      // Notify all players in lobby - emit to both the room AND directly to the joining socket
-      // This ensures the joining player receives the update even if socket.join() hasn't completed yet
-      console.log(`📡 Emitting lobby:updated to room ${lobbyId} with ${lobby.players.length} players`);
-      io.to(lobbyId).emit('lobby:updated', lobby);
-      socket.emit('lobby:updated', lobby); // Direct emit to joining socket
+      // Use setImmediate to ensure socket.join() completes before emitting
+      setImmediate(() => {
+        // Notify all players in lobby - emit to both the room AND directly to the joining socket
+        // This ensures the joining player receives the update even if socket.join() hasn't completed yet
+        console.log(`📡 Emitting lobby:updated to room ${lobbyId} with ${lobby.players.length} players`);
+        console.log(`📡 Players in lobby:`, lobby.players.map(p => `${p.walletAddress.substring(0,8)}...${p.walletAddress.substring(p.walletAddress.length-4)}`));
 
-      // Broadcast updated lobby list
-      console.log(`📡 Broadcasting updated lobby list to all clients`);
-      io.emit('lobbies:list', Array.from(lobbies.values()));
+        // Emit to the room (all players already in the lobby)
+        io.to(lobbyId).emit('lobby:updated', lobby);
+
+        // Also emit directly to the joining socket to ensure they get it
+        socket.emit('lobby:updated', lobby);
+
+        // Broadcast updated lobby list to all clients
+        console.log(`📡 Broadcasting updated lobby list to all clients`);
+        io.emit('lobbies:list', Array.from(lobbies.values()));
+      });
     });
 
     // Handle leaving lobby

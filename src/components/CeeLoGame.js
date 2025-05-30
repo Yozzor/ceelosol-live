@@ -132,7 +132,10 @@ export const CeeLoGame = forwardRef(({ stakeLamports, onResult, disabled = false
   };
 
   const rollDice = async () => {
-    if (isRolling || disabled) return;
+    if (isRolling || disabled) {
+      console.log('🎲 Roll blocked - already rolling or disabled');
+      return;
+    }
 
     setIsRolling(true);
     setGameResult(null);
@@ -165,7 +168,6 @@ export const CeeLoGame = forwardRef(({ stakeLamports, onResult, disabled = false
     // Resolve game
     const result = resolveCeeLo(finalDice);
     setGameResult(result);
-    setIsRolling(false);
 
     // Call parent callback with result (but don't wait for backend)
     if (onResult) {
@@ -181,6 +183,11 @@ export const CeeLoGame = forwardRef(({ stakeLamports, onResult, disabled = false
         // Game continues to work even if backend fails
       }
     }
+
+    // Add small delay before allowing next roll to prevent double-clicks
+    setTimeout(() => {
+      setIsRolling(false);
+    }, 500);
   };
 
   return (

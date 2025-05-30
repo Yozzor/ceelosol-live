@@ -38,6 +38,7 @@ export function LobbyRoom({ lobby, onLeaveLobby }) {
   const [tauntCooldown, setTauntCooldown] = useState(0);
   const [activeTaunts, setActiveTaunts] = useState([]);
   const diceRef = useRef(null);
+  const lastRollTimeRef = useRef(0);
 
   // Initialize profile service with current user
   useEffect(() => {
@@ -78,6 +79,10 @@ export function LobbyRoom({ lobby, onLeaveLobby }) {
     const unsubscribeRoundStarted = socketService.on('round:started', (data) => {
       console.log('🎯 Round started:', data);
       setRoundState(data);
+
+      // Reset roll debounce for new round
+      lastRollTimeRef.current = 0;
+
       // Check if it's my turn
       setIsMyTurn(data.currentPlayer === publicKey);
     });
@@ -86,9 +91,13 @@ export function LobbyRoom({ lobby, onLeaveLobby }) {
       console.log('🎲 Player rolled:', data);
       setLastRoll(data);
 
-      // Trigger dice animation for all players to see in real-time
-      if (diceRef.current && data.dice) {
+      // Only animate dice for OTHER players (not the player who rolled)
+      // This prevents the double-roll animation issue
+      if (diceRef.current && data.dice && data.player !== publicKey) {
+        console.log(`🎲 Animating roll from other player: ${data.player.substring(0,8)}`);
         diceRef.current.animateRoll(data.dice);
+      } else if (data.player === publicKey) {
+        console.log(`🎲 Ignoring own roll animation to prevent double-roll`);
       }
     });
 
@@ -352,7 +361,16 @@ export function LobbyRoom({ lobby, onLeaveLobby }) {
   const handleDiceRoll = async (result) => {
     console.log('🎲 Dice rolled:', result);
 
+    // CRITICAL: Prevent rapid successive rolls with debounce
+    const now = Date.now();
+    if (now - lastRollTimeRef.current < 3000) { // 3 second debounce
+      console.warn('🎲 Roll ignored - too soon after last roll');
+      return;
+    }
+    lastRollTimeRef.current = now;
+
     // Send dice roll to backend
+    console.log('🎲 Sending roll to backend:', result.dice);
     socketService.rollDice(currentLobby.id, publicKey, result.dice);
 
     // Update turn state

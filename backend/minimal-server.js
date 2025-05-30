@@ -274,6 +274,12 @@ io.on('connection', (socket) => {
       return;
     }
 
+    // CRITICAL: Check if player has already rolled this round
+    if (gameState.currentRoundRolls[walletAddress]) {
+      console.error(`❌ Player ${walletAddress} has already rolled this round!`);
+      return;
+    }
+
     // Validate dice roll
     if (!Array.isArray(dice) || dice.length !== 3 || dice.some(d => d < 1 || d > 6)) {
       console.error(`❌ Invalid dice roll from ${walletAddress}:`, dice);

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Wallet Modal Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --sa-green: #36682c;
+            --sa-gold: #906210;
+            --sa-red: #b4191d;
+            --sa-sand: #e1e1e1;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            min-height: 100vh;
+            color: var(--sa-sand);
+        }
+
+        /* Wallet Modal Responsive Styling */
+        .wallet-modal-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            z-index: 1050 !important;
+            overflow: hidden !important;
+        }
+
+        .wallet-modal-dialog {
+            max-height: 100vh !important;
+            margin: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 1rem !important;
+        }
+
+        .wallet-modal-content {
+            max-height: calc(100vh - 2rem) !important;
+            width: 100% !important;
+            max-width: 600px !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .wallet-modal-header {
+            flex-shrink: 0 !important;
+        }
+
+        .wallet-modal-body {
+            overflow-y: auto !important;
+            flex-grow: 1 !important;
+            max-height: calc(100vh - 200px) !important;
+        }
+
+        .wallet-modal-footer {
+            flex-shrink: 0 !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 0.5rem !important;
+            justify-content: center !important;
+        }
+
+        /* Mobile-first responsive design */
+        @media (max-width: 576px) {
+            .wallet-modal-dialog {
+                padding: 0.5rem !important;
+            }
+            
+            .wallet-modal-content {
+                max-height: calc(100vh - 1rem) !important;
+                border-radius: 12px !important;
+            }
+            
+            .wallet-modal-header {
+                padding: 15px !important;
+                border-radius: 10px 10px 0 0 !important;
+            }
+            
+            .wallet-modal-header h5 {
+                font-size: 1.4rem !important;
+            }
+            
+            .wallet-modal-body {
+                padding: 1rem !important;
+                max-height: calc(100vh - 160px) !important;
+            }
+            
+            .wallet-modal-footer {
+                padding: 1rem !important;
+                flex-direction: column !important;
+                gap: 0.75rem !important;
+            }
+            
+            .wallet-modal-footer .btn {
+                width: 100% !important;
+                min-width: auto !important;
+                padding: 12px 16px !important;
+                font-size: 0.95rem !important;
+            }
+        }
+
+        /* Tablet responsive design */
+        @media (min-width: 577px) and (max-width: 768px) {
+            .wallet-modal-footer .btn {
+                flex: 1 1 calc(50% - 0.25rem) !important;
+                min-width: 120px !important;
+            }
+            
+            .wallet-modal-footer .btn:last-child {
+                flex: 1 1 100% !important;
+                margin-top: 0.5rem !important;
+            }
+        }
+
+        /* Scrollbar styling */
+        .wallet-modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .wallet-modal-body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .wallet-modal-body::-webkit-scrollbar-thumb {
+            background: var(--sa-green);
+            border-radius: 4px;
+        }
+
+        .wallet-modal-body::-webkit-scrollbar-thumb:hover {
+            background: var(--sa-gold);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
+        <button class="btn btn-primary btn-lg" onclick="showModal()">Test Responsive Wallet Modal</button>
+    </div>
+
+    <!-- Wallet Information Modal -->
+    <div id="walletModal" class="modal wallet-modal-overlay" style="display: none; background-color: rgba(0,0,0,0.95); backdrop-filter: blur(10px);">
+        <div class="modal-dialog modal-lg wallet-modal-dialog">
+            <div class="modal-content border-0 wallet-modal-content" style="background-color: rgba(0, 0, 0, 0.95); backdrop-filter: blur(15px); border-radius: 20px; border: 2px solid var(--sa-green); box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
+                <div class="modal-header border-0 wallet-modal-header" style="background-color: var(--sa-green); border-radius: 18px 18px 0 0; padding: 20px;">
+                    <h5 class="modal-title text-white" style="font-family: 'Pricedown', sans-serif; font-size: 1.8rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                        🎉 Your New Wallet Created!
+                    </h5>
+                    <button type="button" class="btn-close" style="background-color: transparent; border: none; font-size: 1.5rem; color: #ffffff; opacity: 0.8;" onclick="hideModal()">
+                        ×
+                    </button>
+                </div>
+                <div class="modal-body p-4 text-white wallet-modal-body">
+                    <div class="alert mb-4" style="background-color: rgba(255, 193, 7, 0.2); border: 1px solid var(--sa-gold); border-radius: 12px; color: #ffc107;">
+                        <strong>⚠️ Important:</strong> Save your wallet information! If you lose this, you won't be able to recover your funds.
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="mb-2" style="color: var(--sa-gold); font-weight: bold; font-size: 1.1rem;">
+                            Your Wallet Address:
+                        </label>
+                        <input type="text" class="form-control text-white" value="CBqvX073RfSpjCJMoHoebqzqSKJbXWrLpT" readonly style="background-color: rgba(0, 0, 0, 0.6); border: 2px solid var(--sa-gold); border-radius: 8px; font-size: 14px; padding: 12px;">
+                        <small class="text-muted mt-1 d-block">This is your public wallet address - use this to access CeeloSol</small>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="mb-2" style="color: var(--sa-gold); font-weight: bold; font-size: 1.1rem;">
+                            Private Key - Base58 Format (for Phantom wallet):
+                        </label>
+                        <textarea class="form-control text-white" readonly rows="3" style="background-color: rgba(0, 0, 0, 0.6); border: 2px solid var(--sa-gold); border-radius: 8px; font-size: 14px; padding: 12px; resize: vertical;">3JWGSrWAyxvhbAHKvmPKZUJNRHTPmqcSRqRFEUPRdNyeHT1qZeMMyqOT1dgLdUqRoeKH</textarea>
+                        <small class="text-muted mt-1 d-block">Copy this to import into Phantom wallet</small>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="mb-2" style="color: var(--sa-green); font-weight: bold; font-size: 1.1rem;">
+                            🔒 Safe Word (for additional security):
+                        </label>
+                        <input type="text" class="form-control text-white" value="bullet guilt citizen exhibit" readonly style="background-color: rgba(0, 0, 0, 0.6); border: 2px solid var(--sa-green); border-radius: 8px; font-size: 14px; padding: 12px;">
+                        <small class="text-muted mt-1 d-block">Remember this safe word - you'll need it to access your wallet</small>
+                    </div>
+
+                    <div class="alert" style="background-color: rgba(54, 104, 44, 0.2); border: 1px solid var(--sa-green); border-radius: 12px; color: var(--sa-green);">
+                        <p class="mb-0">
+                            <strong>Next Steps:</strong><br>
+                            1. Copy your wallet address above<br>
+                            2. Save your private key securely<br>
+                            3. <strong>Remember your safe word</strong> - you'll need it for authentication<br>
+                            4. Click "Continue" and enter your wallet address to access CeeloSol<br>
+                            5. Optional: Import the Base58 key into Phantom wallet
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 wallet-modal-footer" style="background-color: rgba(0, 0, 0, 0.3);">
+                    <button class="btn" style="background-color: rgba(144, 98, 16, 0.3); border: 2px solid var(--sa-gold); color: var(--sa-gold); border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 0.9rem; min-width: 120px;">
+                        Copy Address
+                    </button>
+                    <button class="btn" style="background-color: rgba(144, 98, 16, 0.3); border: 2px solid var(--sa-gold); color: var(--sa-gold); border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 0.9rem; min-width: 120px;">
+                        Copy Key
+                    </button>
+                    <button class="btn" style="background-color: rgba(54, 104, 44, 0.3); border: 2px solid var(--sa-green); color: var(--sa-green); border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 0.9rem; min-width: 120px;">
+                        Copy Safe Word
+                    </button>
+                    <button class="btn" onclick="hideModal()" style="background-color: var(--sa-green); border: 2px solid var(--sa-green); color: #ffffff; border-radius: 8px; padding: 10px 16px; font-weight: bold; font-size: 1rem; min-width: 140px;">
+                        Continue
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showModal() {
+            document.getElementById('walletModal').style.display = 'block';
+        }
+
+        function hideModal() {
+            document.getElementById('walletModal').style.display = 'none';
+        }
+
+        // Test different viewport sizes
+        function testViewport(width, height) {
+            window.resizeTo(width, height);
+        }
+    </script>
+</body>
+</html>

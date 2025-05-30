@@ -1,0 +1,211 @@
+/* Wallet Modal Responsive Styling */
+
+/* Base modal styling for all screen sizes */
+.wallet-modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 1050 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.wallet-modal-dialog {
+  margin: 0 !important;
+  max-width: 600px !important;
+  width: 90% !important;
+  max-height: 90vh !important;
+}
+
+.wallet-modal-content {
+  max-height: 100% !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.wallet-modal-header {
+  flex-shrink: 0 !important;
+}
+
+.wallet-modal-body {
+  overflow-y: auto !important;
+  flex-grow: 1 !important;
+  max-height: calc(90vh - 200px) !important;
+}
+
+.wallet-modal-footer {
+  flex-shrink: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
+  justify-content: center !important;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 576px) {
+  .wallet-modal-dialog {
+    padding: 0.5rem !important;
+  }
+  
+  .wallet-modal-content {
+    max-height: calc(100vh - 1rem) !important;
+    border-radius: 12px !important;
+  }
+  
+  .wallet-modal-header {
+    padding: 15px !important;
+    border-radius: 10px 10px 0 0 !important;
+  }
+  
+  .wallet-modal-header h5 {
+    font-size: 1.4rem !important;
+  }
+  
+  .wallet-modal-body {
+    padding: 1rem !important;
+    max-height: calc(100vh - 160px) !important;
+  }
+  
+  .wallet-modal-footer {
+    padding: 1rem !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+  
+  .wallet-modal-footer .btn {
+    width: 100% !important;
+    min-width: auto !important;
+    padding: 12px 16px !important;
+    font-size: 0.95rem !important;
+  }
+  
+  /* Form elements responsive styling */
+  .wallet-modal-body .form-group {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  .wallet-modal-body .form-control {
+    font-size: 14px !important;
+    padding: 10px !important;
+  }
+  
+  .wallet-modal-body textarea.form-control {
+    min-height: 80px !important;
+  }
+  
+  .wallet-modal-body .alert {
+    padding: 12px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Tablet responsive design */
+@media (min-width: 577px) and (max-width: 768px) {
+  .wallet-modal-dialog {
+    padding: 1rem !important;
+  }
+  
+  .wallet-modal-content {
+    max-width: 550px !important;
+  }
+  
+  .wallet-modal-footer {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+  }
+  
+  .wallet-modal-footer .btn {
+    flex: 1 1 calc(50% - 0.25rem) !important;
+    min-width: 120px !important;
+  }
+  
+  .wallet-modal-footer .btn:last-child {
+    flex: 1 1 100% !important;
+    margin-top: 0.5rem !important;
+  }
+}
+
+/* Desktop responsive design */
+@media (min-width: 769px) {
+  .wallet-modal-dialog {
+    padding: 2rem !important;
+  }
+  
+  .wallet-modal-content {
+    max-width: 600px !important;
+  }
+  
+  .wallet-modal-footer {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+  }
+  
+  .wallet-modal-footer .btn {
+    flex: 0 0 auto !important;
+  }
+}
+
+/* Large desktop responsive design */
+@media (min-width: 992px) {
+  .wallet-modal-dialog {
+    padding: 3rem !important;
+  }
+  
+  .wallet-modal-body {
+    max-height: calc(100vh - 250px) !important;
+  }
+}
+
+/* Ensure proper scrolling behavior */
+.wallet-modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.wallet-modal-body::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.wallet-modal-body::-webkit-scrollbar-thumb {
+  background: var(--sa-green);
+  border-radius: 4px;
+}
+
+.wallet-modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--sa-gold);
+}
+
+/* Focus and accessibility improvements */
+.wallet-modal-content:focus {
+  outline: 2px solid var(--sa-green);
+  outline-offset: 2px;
+}
+
+.wallet-modal-footer .btn:focus {
+  outline: 2px solid var(--sa-gold);
+  outline-offset: 2px;
+}
+
+/* Animation improvements for mobile */
+@media (max-width: 576px) {
+  .wallet-modal-content {
+    animation: slideUpMobile 0.3s ease-out;
+  }
+}
+
+@keyframes slideUpMobile {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

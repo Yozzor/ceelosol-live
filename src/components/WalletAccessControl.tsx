@@ -335,7 +335,7 @@ export const WalletAccessControl: React.FC<WalletAccessControlProps> = ({
 
                   <button
                     type="submit"
-                    className="btn w-100 text-dark font-weight-bold"
+                    className="btn w-100 text-white font-weight-bold"
                     disabled={isChecking || !walletAddress.trim() || (showSafeWordInput && !safeWord.trim())}
                     style={{
                       backgroundColor: 'var(--sa-green)',
@@ -344,8 +344,9 @@ export const WalletAccessControl: React.FC<WalletAccessControlProps> = ({
                       fontSize: '1.2rem',
                       padding: '12px',
                       fontFamily: 'Pricedown, sans-serif',
-                      textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
-                      transition: 'all 0.3s ease'
+                      textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                      transition: 'all 0.3s ease',
+                      color: '#ffffff'
                     }}
                     onMouseEnter={(e) => {
                       if (!isChecking && walletAddress.trim() && (!showSafeWordInput || safeWord.trim())) {

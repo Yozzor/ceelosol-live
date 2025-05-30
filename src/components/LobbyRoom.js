@@ -194,6 +194,21 @@ export function LobbyRoom({ lobby, onLeaveLobby }) {
       setGameResult(data);
       setIsMyTurn(false);
 
+      // Log payout information
+      if (data.payout) {
+        console.log('💰 Payout information:', data.payout);
+        if (data.payout.success) {
+          console.log(`✅ Winner received ${data.payout.amount} SOL`);
+          if (data.payout.signature && !data.payout.simulated) {
+            console.log(`📝 Transaction: ${data.payout.signature}`);
+          } else if (data.payout.simulated) {
+            console.log('🎭 Simulated payout (treasury wallet not configured)');
+          }
+        } else {
+          console.log('❌ Payout failed:', data.payout.error);
+        }
+      }
+
       // Update profile stats for game completion
       if (data.finalLeaderboard && data.overallWinner) {
         const playerStats = data.finalLeaderboard[publicKey];
@@ -566,10 +581,22 @@ export function LobbyRoom({ lobby, onLeaveLobby }) {
       ) : gameState ? (
         <div className="game-interface">
           <div className="game-header">
-            <h3>🎮 ROUND {roundState?.round || gameState.lobby.gameState?.currentRound || 1} OF {currentLobby.totalRounds}</h3>
+            {roundState?.isSuddenDeath ? (
+              <h3>🔥 SUDDEN DEATH ROUND {roundState.suddenDeathRound} - WINNER TAKES ALL!</h3>
+            ) : (
+              <h3>🎮 ROUND {roundState?.round || gameState.lobby.gameState?.currentRound || 1} OF {currentLobby.totalRounds}</h3>
+            )}
             <div className="round-info">
               <span>Pot: {(roundState?.betAmount || (currentLobby.difficulty === 'easy' ? 0.1 : 0.5)) * currentLobby.players.length} SOL</span>
+              {roundState?.isSuddenDeath && (
+                <span className="sudden-death-indicator">⚡ SUDDEN DEATH ⚡</span>
+              )}
             </div>
+            {roundState?.message && (
+              <div className="round-message">
+                {roundState.message}
+              </div>
+            )}
           </div>
 
           {/* Live Scoreboard */}

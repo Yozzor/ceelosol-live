@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const web3 = require('@solana/web3.js');
+const bs58 = require('bs58');
 
 console.log('🚀 Starting CeeloSol Backend Server with Socket.IO...');
 
@@ -29,7 +31,111 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 3001;
 
 // DEDICATED HOUSE TREASURY WALLET (SEPARATE FROM ALL USER WALLETS)
-const HOUSE_WALLET_ADDRESS = '8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS';
+const HOUSE_WALLET_ADDRESS = '3WgTYUtNQhoi2sUXE4fh8GQ1cCFxkTcdjXLyxxJ7ympu';
+
+// Initialize Solana connection and treasury wallet
+const connection = new web3.Connection(
+  process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
+  'confirmed'
+);
+
+let treasuryKeypair = null;
+
+// Initialize treasury wallet from environment
+function initializeTreasuryWallet() {
+  const bankerSecretKey = process.env.BANKER_SECRET_KEY;
+
+  if (bankerSecretKey && bankerSecretKey.trim() !== '') {
+    try {
+      const secretKeyBytes = bs58.decode(bankerSecretKey);
+      treasuryKeypair = web3.Keypair.fromSecretKey(secretKeyBytes);
+      console.log('✅ Treasury wallet loaded from environment');
+      console.log('🏦 Treasury address:', treasuryKeypair.publicKey.toBase58());
+
+      // Verify it matches our expected address
+      if (treasuryKeypair.publicKey.toBase58() !== HOUSE_WALLET_ADDRESS) {
+        console.warn('⚠️ Treasury keypair address does not match expected HOUSE_WALLET_ADDRESS');
+      }
+    } catch (error) {
+      console.error('❌ Failed to load treasury wallet:', error);
+      console.log('💰 Treasury operations will be disabled');
+    }
+  } else {
+    console.log('⚠️ BANKER_SECRET_KEY not found - treasury operations disabled');
+    console.log('💡 Add BANKER_SECRET_KEY to environment variables to enable real SOL transactions');
+  }
+}
+
+// Initialize treasury on startup
+initializeTreasuryWallet();
+
+// Treasury payout function
+async function processWinnerPayout(winnerAddress, totalPot, lobbyId) {
+  if (!treasuryKeypair) {
+    console.log(`💰 Treasury wallet not available - simulating payout of ${totalPot} SOL to ${winnerAddress}`);
+    return {
+      success: true,
+      simulated: true,
+      amount: totalPot,
+      signature: `simulated_${Date.now()}`
+    };
+  }
+
+  try {
+    const winnerPubkey = new web3.PublicKey(winnerAddress);
+    const payoutLamports = Math.floor(totalPot * web3.LAMPORTS_PER_SOL);
+
+    // Check treasury balance
+    const treasuryBalance = await connection.getBalance(treasuryKeypair.publicKey);
+    console.log(`🏦 Treasury balance: ${treasuryBalance / web3.LAMPORTS_PER_SOL} SOL`);
+
+    if (treasuryBalance < payoutLamports) {
+      console.error(`❌ Insufficient treasury funds! Need ${totalPot} SOL, have ${treasuryBalance / web3.LAMPORTS_PER_SOL} SOL`);
+      return {
+        success: false,
+        error: 'Insufficient treasury funds',
+        required: totalPot,
+        available: treasuryBalance / web3.LAMPORTS_PER_SOL
+      };
+    }
+
+    // Create payout transaction
+    const transaction = new web3.Transaction().add(
+      web3.SystemProgram.transfer({
+        fromPubkey: treasuryKeypair.publicKey,
+        toPubkey: winnerPubkey,
+        lamports: payoutLamports,
+      })
+    );
+
+    // Get recent blockhash and sign
+    const { blockhash } = await connection.getLatestBlockhash();
+    transaction.recentBlockhash = blockhash;
+    transaction.feePayer = treasuryKeypair.publicKey;
+    transaction.sign(treasuryKeypair);
+
+    // Send transaction
+    const signature = await connection.sendRawTransaction(transaction.serialize());
+    await connection.confirmTransaction(signature);
+
+    console.log(`💰 Payout successful! Sent ${totalPot} SOL to ${winnerAddress}`);
+    console.log(`📝 Transaction signature: ${signature}`);
+
+    return {
+      success: true,
+      amount: totalPot,
+      signature: signature,
+      lamports: payoutLamports
+    };
+
+  } catch (error) {
+    console.error(`❌ Payout failed for lobby ${lobbyId}:`, error);
+    return {
+      success: false,
+      error: error.message || 'Transaction failed'
+    };
+  }
+}
 
 // Middleware
 app.use(cors({
@@ -50,14 +156,27 @@ app.get('/api/health', (req, res) => {
 });
 
 // House wallet endpoint
-app.get('/api/house-wallet', (req, res) => {
+app.get('/api/house-wallet', async (req, res) => {
   try {
+    let balance = 0;
+    let balanceInSOL = 0;
+
+    // Get real balance if treasury wallet is available
+    if (treasuryKeypair) {
+      try {
+        balance = await connection.getBalance(treasuryKeypair.publicKey);
+        balanceInSOL = balance / web3.LAMPORTS_PER_SOL;
+      } catch (error) {
+        console.error('Error fetching treasury balance:', error);
+      }
+    }
+
     res.json({
       success: true,
       houseWallet: {
         publicKey: HOUSE_WALLET_ADDRESS,
-        balance: 0,
-        balanceInSOL: 0
+        balance: balance,
+        balanceInSOL: balanceInSOL
       }
     });
   } catch (error) {
@@ -106,6 +225,8 @@ io.on('connection', (socket) => {
       maxPlayers: data.maxPlayers || 4,
       betAmount: data.betAmount || 0.1,
       rounds: data.rounds || 3,
+      difficulty: data.difficulty || 'easy',
+      treasuryAddress: HOUSE_WALLET_ADDRESS,
       players: [{
         id: data.walletAddress,
         walletAddress: data.walletAddress,
@@ -365,18 +486,12 @@ io.on('connection', (socket) => {
       });
 
       // Check if game is finished
-      if (gameState.currentRound >= lobby.rounds) {
-        // Game over
-        lobby.status = 'finished';
-        const winner = Object.entries(gameState.leaderboard)
-          .sort(([,a], [,b]) => b.wins - a.wins)[0];
-
-        io.to(lobbyId).emit('game:ended', {
-          lobby,
-          overallWinner: winner[0],
-          finalLeaderboard: gameState.leaderboard,
-          message: `Game completed! Winner: ${winner[0]}`
-        });
+      if (gameState.currentRound >= lobby.rounds && !gameState.suddenDeath?.active) {
+        // Check for ties and handle sudden death
+        checkGameEndAndHandleTies(lobby, io);
+      } else if (gameState.suddenDeath?.active) {
+        // In sudden death mode, check if we have a winner
+        checkGameEndAndHandleTies(lobby, io);
       } else {
         // Start next round
         gameState.currentRound += 1;
@@ -434,17 +549,12 @@ io.on('connection', (socket) => {
           });
 
           // Check if game is finished
-          if (gameState.currentRound >= lobby.rounds) {
-            lobby.status = 'finished';
-            const winner = Object.entries(gameState.leaderboard)
-              .sort(([,a], [,b]) => b.wins - a.wins)[0];
-
-            io.to(lobbyId).emit('game:ended', {
-              lobby,
-              overallWinner: winner[0],
-              finalLeaderboard: gameState.leaderboard,
-              message: `Game completed! Winner: ${winner[0]}`
-            });
+          if (gameState.currentRound >= lobby.rounds && !gameState.suddenDeath?.active) {
+            // Check for ties and handle sudden death
+            checkGameEndAndHandleTies(lobby, io);
+          } else if (gameState.suddenDeath?.active) {
+            // In sudden death mode, check if we have a winner
+            checkGameEndAndHandleTies(lobby, io);
           } else {
             // Start next round
             gameState.currentRound += 1;
@@ -472,18 +582,13 @@ io.on('connection', (socket) => {
             )
           });
 
-          if (gameState.currentRound >= lobby.rounds) {
-            // Game ends in tie
-            lobby.status = 'finished';
-            const winner = Object.entries(gameState.leaderboard)
-              .sort(([,a], [,b]) => b.wins - a.wins)[0];
-
-            io.to(lobbyId).emit('game:ended', {
-              lobby,
-              overallWinner: winner[0],
-              finalLeaderboard: gameState.leaderboard,
-              message: `Game completed! Winner: ${winner[0]}`
-            });
+          if (gameState.currentRound >= lobby.rounds && !gameState.suddenDeath?.active) {
+            // Check for ties and handle sudden death
+            checkGameEndAndHandleTies(lobby, io);
+          } else if (gameState.suddenDeath?.active) {
+            // In sudden death mode, continue until someone wins
+            gameState.suddenDeath.round += 1;
+            startSuddenDeathRound(lobby, io);
           } else {
             gameState.currentRound += 1;
             gameState.currentPlayerIndex = 0;
@@ -626,6 +731,111 @@ io.on('connection', (socket) => {
     }
   });
 });
+
+// Function to check for ties and handle sudden death
+function checkGameEndAndHandleTies(lobby, io) {
+  const gameState = lobby.gameState;
+  const leaderboard = gameState.leaderboard;
+
+  // Get all players sorted by wins (descending)
+  const sortedPlayers = Object.entries(leaderboard)
+    .sort(([,a], [,b]) => b.wins - a.wins);
+
+  const topScore = sortedPlayers[0][1].wins;
+  const playersWithTopScore = sortedPlayers.filter(([,player]) => player.wins === topScore);
+
+  console.log(`🏆 Game end check - Top score: ${topScore}, Players with top score: ${playersWithTopScore.length}`);
+
+  if (playersWithTopScore.length > 1) {
+    // TIE DETECTED! Start sudden death
+    console.log(`🤝 TIE DETECTED! ${playersWithTopScore.length} players tied with ${topScore} wins each`);
+    console.log(`🔥 Starting SUDDEN DEATH rounds!`);
+
+    // Initialize sudden death mode
+    if (!gameState.suddenDeath) {
+      gameState.suddenDeath = {
+        active: true,
+        round: 1,
+        tiedPlayers: playersWithTopScore.map(([addr]) => addr)
+      };
+    }
+
+    // Notify players about sudden death
+    io.to(lobby.id).emit('game:tied', {
+      lobby,
+      tiedPlayers: playersWithTopScore.map(([addr]) => addr),
+      tiedScore: topScore,
+      suddenDeathRound: gameState.suddenDeath.round,
+      message: `Game tied! ${playersWithTopScore.length} players with ${topScore} wins each. Starting sudden death round ${gameState.suddenDeath.round}!`,
+      finalLeaderboard: leaderboard
+    });
+
+    // Start sudden death round after 5 seconds
+    setTimeout(() => {
+      startSuddenDeathRound(lobby, io);
+    }, 5000);
+
+  } else {
+    // Clear winner - end game normally and process payout
+    const winner = sortedPlayers[0];
+    lobby.status = 'finished';
+
+    console.log(`🏆 Game completed! Winner: ${winner[0]} with ${winner[1].wins} wins`);
+
+    // Calculate total pot (all players' commitments)
+    const betAmount = lobby.difficulty === 'easy' ? 0.1 : 0.5;
+    const totalPot = betAmount * lobby.players.length * lobby.rounds;
+
+    console.log(`💰 Processing winner payout: ${totalPot} SOL to ${winner[0]}`);
+
+    // Process payout asynchronously
+    processWinnerPayout(winner[0], totalPot, lobby.id).then(payoutResult => {
+      console.log(`💰 Payout result for ${winner[0]}:`, payoutResult);
+
+      // Emit game ended with payout information
+      io.to(lobby.id).emit('game:ended', {
+        lobby,
+        overallWinner: winner[0],
+        finalLeaderboard: leaderboard,
+        message: `Game completed! Winner: ${winner[0]} with ${winner[1].wins} wins!`,
+        payout: payoutResult
+      });
+    }).catch(error => {
+      console.error('❌ Payout processing error:', error);
+
+      // Still emit game ended even if payout fails
+      io.to(lobby.id).emit('game:ended', {
+        lobby,
+        overallWinner: winner[0],
+        finalLeaderboard: leaderboard,
+        message: `Game completed! Winner: ${winner[0]} with ${winner[1].wins} wins!`,
+        payout: { success: false, error: 'Payout failed' }
+      });
+    });
+  }
+}
+
+// Function to start a sudden death round
+function startSuddenDeathRound(lobby, io) {
+  const gameState = lobby.gameState;
+
+  // Reset round state for sudden death
+  gameState.currentRound += 1;
+  gameState.currentPlayerIndex = 0;
+  gameState.currentRoundRolls = {};
+
+  console.log(`🔥 Starting sudden death round ${gameState.suddenDeath.round}`);
+
+  io.to(lobby.id).emit('round:started', {
+    round: gameState.currentRound,
+    totalRounds: lobby.rounds,
+    currentPlayer: lobby.players[0].walletAddress,
+    betAmount: lobby.difficulty === 'easy' ? 0.1 : 0.5,
+    isSuddenDeath: true,
+    suddenDeathRound: gameState.suddenDeath.round,
+    message: `Sudden Death Round ${gameState.suddenDeath.round} - Winner takes all!`
+  });
+}
 
 // Start server
 server.listen(PORT, () => {

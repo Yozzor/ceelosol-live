@@ -53,7 +53,7 @@ interface PlayerRoll {
 }
 
 // DEDICATED HOUSE TREASURY WALLET (SEPARATE FROM ALL USER WALLETS)
-const TREASURY_ADDRESS = '8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS';
+const TREASURY_ADDRESS = '3WgTYUtNQhoi2sUXE4fh8GQ1cCFxkTcdjXLyxxJ7ympu';
 
 // In-memory storage (in production, use Redis or database)
 const lobbies = new Map<string, Lobby>();

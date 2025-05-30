@@ -24,3 +24,11 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Treasury wallet files - NEVER COMMIT THESE!
+treasury-wallet.json
+treasury-private-key.txt
+backend/treasury-wallet.json
+backend/treasury-private-key.txt
+NEW_TREASURY_WALLET_INFO.md
+generate-treasury.js

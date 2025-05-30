@@ -19,7 +19,7 @@ export class TreasuryMonitor {
   // Fetch the real house wallet address from backend
   async initializeTreasuryAddress() {
     // Set fallback treasury address immediately
-    this.treasuryAddress = '8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS';
+    this.treasuryAddress = '3WgTYUtNQhoi2sUXE4fh8GQ1cCFxkTcdjXLyxxJ7ympu';
 
     try {
       const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.HOUSE_WALLET));

@@ -41,7 +41,7 @@ class SocketService {
       totalRounds: totalRounds,
       // Preserve other fields
       status: backendLobby.status || 'waiting',
-      treasuryAddress: backendLobby.treasuryAddress || 'GMAuqtZuYpwt3Y9EUeeEfQFJGDpsExWXG1ZegGBQwAW6'
+      treasuryAddress: backendLobby.treasuryAddress || '3WgTYUtNQhoi2sUXE4fh8GQ1cCFxkTcdjXLyxxJ7ympu'
     };
   }
 
@@ -82,7 +82,13 @@ class SocketService {
 
     // Force production URL for immediate fix with fallback
     let socketUrl;
-    if (process.env.NODE_ENV === 'production') {
+
+    // Check if we're on production domain OR if we want to force production backend
+    const isProductionDomain = window.location.hostname.includes('onrender.com') ||
+                              window.location.hostname.includes('ceelosol');
+    const forceProduction = process.env.NODE_ENV === 'production' || isProductionDomain;
+
+    if (forceProduction) {
       // Try primary backend URL first, with fallback options
       const backendUrls = [
         'https://ceelosol-backend.onrender.com',
@@ -94,6 +100,7 @@ class SocketService {
       socketUrl = backendUrls[0];
       console.log('🔌 Production mode: Using backend URL:', socketUrl);
       console.log('🔌 Available fallback URLs:', backendUrls.slice(1));
+      console.log('🔌 Production detection: NODE_ENV =', process.env.NODE_ENV, 'hostname =', window.location.hostname);
     } else {
       socketUrl = API_CONFIG.SOCKET_URL;
       console.log('🔌 Development mode: Using local URL:', socketUrl);

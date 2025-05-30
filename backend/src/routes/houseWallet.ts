@@ -17,7 +17,7 @@ export async function houseWalletStatusHandler(req: Request, res: Response) {
     if (!bankerSecretKey || bankerSecretKey.trim() === '') {
       // Fallback to minimal server response format
       console.log('⚠️ BANKER_SECRET_KEY not found, using fallback house wallet address');
-      const FALLBACK_HOUSE_WALLET = '8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS';
+      const FALLBACK_HOUSE_WALLET = '3WgTYUtNQhoi2sUXE4fh8GQ1cCFxkTcdjXLyxxJ7ympu';
 
       res.json({
         success: true,
@@ -60,7 +60,7 @@ export async function houseWalletStatusHandler(req: Request, res: Response) {
 
     // Fallback to minimal server response format on any error
     console.log('⚠️ Error occurred, using fallback house wallet address');
-    const FALLBACK_HOUSE_WALLET = '8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS';
+    const FALLBACK_HOUSE_WALLET = '3WgTYUtNQhoi2sUXE4fh8GQ1cCFxkTcdjXLyxxJ7ympu';
 
     res.json({
       success: true,

@@ -1,9 +1,9 @@
 {
   "treasuryWallet": {
-    "publicKey": "8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS",
-    "secretKeyBase58": "EHVhPoeXMpwczeQ9JDzqzXV6njzAi4NueDBXSbZ9ttdu7Tavv2BKGHANPN7Tqw8i7To4JnRDjmxXJnXbo3f4hRr",
-    "secretKeyArray": [11,116,185,133,189,84,197,34,11,252,212,84,198,58,185,221,186,226,121,211,233,28,196,230,204,122,101,155,16,83,139,174,116,55,45,237,224,153,108,28,79,225,16,255,104,3,242,63,129,18,12,112,33,221,59,65,68,145,106,171,109,3,245,217],
-    "createdAt": "2024-12-19T15:30:00.000Z",
+    "publicKey": "3WgTYUtNQhoi2sUXE4fh8GQ1cCFxkTcdjXLyxxJ7ympu",
+    "secretKeyBase58": "5aHKDyFFFFEK6UhpaWGikq9ry21TEEsAaNfPi79RynLULjJernazeML6vsx4jsZZBbuu7Nz41aa2HZZzHmcJHFAFB",
+    "secretKeyArray": "GENERATED_FROM_NEW_KEYPAIR",
+    "createdAt": "2025-05-30T20:27:28.820Z",
     "purpose": "CeeloSol House Treasury - Dedicated gambling platform wallet",
     "securityLevel": "MAXIMUM",
     "accessLevel": "Backend Only"
@@ -14,17 +14,17 @@
     "note": "This was incorrectly used as treasury - now remains as user wallet"
   },
   "migration": {
-    "from": "GMAuqtZuYpwt3Y9EUeeEfQFJGDpsExWXG1ZegGBQwAW6",
-    "to": "8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS",
-    "reason": "Security fix - separate treasury from user wallets",
-    "date": "2024-12-19"
+    "from": "8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS",
+    "to": "3WgTYUtNQhoi2sUXE4fh8GQ1cCFxkTcdjXLyxxJ7ympu",
+    "reason": "Generated new treasury wallet with known private key",
+    "date": "2025-05-30"
   },
   "environmentVariable": {
     "name": "BANKER_SECRET_KEY",
-    "value": "EHVhPoeXMpwczeQ9JDzqzXV6njzAi4NueDBXSabZ9ttdu7Tavv2BKGHANPN7Tqw8i7To4JnRDjmxXJnXbo3f4hRr"
+    "value": "5aHKDyFFFFEK6UhpaWGikq9ry21TEEsAaNfPi79RynLULjJernazeML6vsx4jsZZBbuu7Nz41aa2HZZzHmcJHFAFB"
   },
   "monitoring": {
-    "solanaExplorer": "https://explorer.solana.com/address/8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS",
-    "solscan": "https://solscan.io/account/8pf6SrHApuvXvZgPzYSR6am6f7bwxuK2t2PJbKHoR3VS"
+    "solanaExplorer": "https://explorer.solana.com/address/3WgTYUtNQhoi2sUXE4fh8GQ1cCFxkTcdjXLyxxJ7ympu",
+    "solscan": "https://solscan.io/account/3WgTYUtNQhoi2sUXE4fh8GQ1cCFxkTcdjXLyxxJ7ympu"
   }
 }

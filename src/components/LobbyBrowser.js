@@ -161,11 +161,65 @@ export function LobbyBrowser({ onBackToModeSelect, onJoinLobby }) {
     }
 
     console.log('👥 Joining lobby:', lobby.id);
+
+    // Set up one-time listener for lobby update after joining
+    const handleLobbyUpdate = (updatedLobby) => {
+      console.log('🏠 Received lobby update after join:', updatedLobby);
+      console.log('🏠 Looking for lobby ID:', lobby.id);
+      console.log('🏠 Updated lobby ID:', updatedLobby.id);
+      console.log('🏠 Current user wallet:', effectivePublicKey);
+      console.log('🏠 Players in updated lobby:', updatedLobby.players?.map(p => p.walletAddress));
+
+      // Check if this update is for the lobby we're trying to join
+      if (updatedLobby.id === lobby.id) {
+        // Check if the current user is now in the lobby
+        const currentPlayer = updatedLobby.players.find(p => p.walletAddress === effectivePublicKey);
+
+        if (currentPlayer) {
+          console.log('✅ Successfully joined lobby, navigating to lobby room');
+          console.log('✅ Final lobby data:', updatedLobby);
+          // Remove the listener since we got our update
+          socketService.off('lobby:updated', handleLobbyUpdate);
+
+          // Navigate to lobby room with updated lobby data
+          if (onJoinLobby) {
+            onJoinLobby(updatedLobby.id, updatedLobby);
+          }
+        } else {
+          console.log('⚠️ Lobby updated but current user not found in players list');
+        }
+      } else {
+        console.log('⚠️ Received update for different lobby');
+      }
+    };
+
+    // Check if user is already in the lobby (e.g., lobby creator)
+    const alreadyInLobby = lobby.players.some(p => p.walletAddress === effectivePublicKey);
+
+    if (alreadyInLobby) {
+      console.log('✅ User already in lobby, navigating immediately');
+      if (onJoinLobby) {
+        onJoinLobby(lobby.id, lobby);
+      }
+      return;
+    }
+
+    // Listen for lobby updates
+    socketService.on('lobby:updated', handleLobbyUpdate);
+
+    // Send join request
     socketService.joinLobby(lobby.id, effectivePublicKey);
 
-    if (onJoinLobby) {
-      onJoinLobby(lobby.id, lobby);
-    }
+    // Set a timeout to remove the listener and fallback if no update comes within 5 seconds
+    setTimeout(() => {
+      console.log('⏰ Timeout waiting for lobby update, falling back to immediate navigation');
+      socketService.off('lobby:updated', handleLobbyUpdate);
+
+      // Fallback: navigate with original lobby data
+      if (onJoinLobby) {
+        onJoinLobby(lobby.id, lobby);
+      }
+    }, 5000);
   };
 
 

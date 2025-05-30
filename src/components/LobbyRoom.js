@@ -46,6 +46,14 @@ export function LobbyRoom({ lobby, onLeaveLobby }) {
     }
   }, [publicKey]);
 
+  // Update currentLobby when lobby prop changes
+  useEffect(() => {
+    if (lobby) {
+      console.log('🏠 LobbyRoom: Updating currentLobby from prop change:', lobby);
+      setCurrentLobby(lobby);
+    }
+  }, [lobby]);
+
   useEffect(() => {
     if (!lobby || !publicKey) return;
 

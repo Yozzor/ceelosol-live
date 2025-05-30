@@ -22,7 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   publicKey: null,
   privateKey: null,
   login: async () => {},
-  register: async () => ({ publicKey: '', secretArray: [], secretBase58: '' }),
+  register: async () => ({ publicKey: '', secretArray: [], secretBase58: '', safeWord: '' }),
   restore: async () => false,
   logout: () => {},
   initializeFromSession: () => {},
@@ -71,10 +71,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Rebuild the secure wallet data
           try {
             const secretArray = JSON.parse(storedPrivArr);
+            const storedSafeWord = localStorage.getItem('ceelo_safe_word') || '';
             const walletData: WalletData = {
               publicKey: storedPub,
               secretBase58: storedPrivB58,
               secretArray: secretArray,
+              safeWord: storedSafeWord,
               createdAt: new Date().toISOString()
             };
             saveWalletSecurely(walletData);
@@ -236,10 +238,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Rebuild the secure wallet data
         try {
           const secretArray = JSON.parse(storedPrivArr);
+          const storedSafeWord = localStorage.getItem('ceelo_safe_word') || '';
           const walletData: WalletData = {
             publicKey: storedPub,
             secretBase58: storedPrivB58,
             secretArray: secretArray,
+            safeWord: storedSafeWord,
             createdAt: new Date().toISOString()
           };
           saveWalletSecurely(walletData);
@@ -320,6 +324,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         publicKey,
         secretBase58,
         secretArray,
+        safeWord: '', // Restored wallets start without safe word, will need migration
         createdAt: new Date().toISOString(),
       };
 

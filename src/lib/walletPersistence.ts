@@ -8,6 +8,7 @@ export interface WalletData {
   publicKey: string;
   secretBase58: string;
   secretArray: number[];
+  safeWord: string;
   createdAt: string;
   lastAccessed?: string;
 }
@@ -76,15 +77,16 @@ export function saveWalletSecurely(walletData: WalletData): void {
         pub: walletData.publicKey,
         priv: walletData.secretBase58,
         arr: walletData.secretArray,
+        safeWord: walletData.safeWord,
         time: new Date().toISOString()
       };
-      
+
       // Try multiple emergency storage methods
       document.cookie = `ceelo_emergency_wallet=${encodeURIComponent(JSON.stringify(emergencyData))}; max-age=31536000; path=/`;
       console.log('⚠️ Emergency cookie backup created');
     } catch (e) {
       console.error('❌ CRITICAL: Even emergency cookie backup failed:', e);
-      alert('CRITICAL ERROR: Failed to save wallet! Please copy your private key immediately!');
+      alert('CRITICAL ERROR: Failed to save wallet! Please copy your private key and safe word immediately!');
     }
   }
 }
@@ -172,7 +174,7 @@ export function loadWalletSecurely(): WalletData | null {
 }
 
 /**
- * Load legacy wallet format
+ * Load legacy wallet format (without safe word - requires migration)
  */
 function loadLegacyWallet(): WalletData | null {
   try {
@@ -183,10 +185,12 @@ function loadLegacyWallet(): WalletData | null {
     if (publicKey && secretBase58 && secretArrayStr) {
       const secretArray = JSON.parse(secretArrayStr);
       if (Array.isArray(secretArray) && secretArray.length === 64) {
+        console.warn('⚠️ Legacy wallet found without safe word - requires user to set safe word');
         return {
           publicKey,
           secretBase58,
           secretArray,
+          safeWord: '', // Empty safe word indicates legacy wallet needing migration
           createdAt: new Date().toISOString(),
         };
       }
@@ -214,6 +218,7 @@ function loadFromEmergencyCookie(): WalletData | null {
             publicKey: data.pub,
             secretBase58: data.priv,
             secretArray: data.arr,
+            safeWord: data.safeWord || '', // Handle legacy cookies without safe word
             createdAt: data.time || new Date().toISOString(),
           };
         }
@@ -228,6 +233,7 @@ function loadFromEmergencyCookie(): WalletData | null {
 
 /**
  * Validate wallet data structure
+ * Note: safeWord can be empty for legacy wallets (requires migration)
  */
 function isValidWalletData(data: any): data is WalletData {
   return (
@@ -236,6 +242,7 @@ function isValidWalletData(data: any): data is WalletData {
     typeof data.secretBase58 === 'string' &&
     Array.isArray(data.secretArray) &&
     data.secretArray.length === 64 &&
+    typeof data.safeWord === 'string' && // Can be empty for legacy wallets
     typeof data.createdAt === 'string'
   );
 }
@@ -251,6 +258,45 @@ function getWalletHistory(): WalletBackup[] {
     console.error('Failed to load wallet history:', error);
     return [];
   }
+}
+
+/**
+ * Check if a wallet needs safe word migration (legacy wallet)
+ */
+export function needsSafeWordMigration(walletData: WalletData): boolean {
+  return !walletData.safeWord || walletData.safeWord.trim().length === 0;
+}
+
+/**
+ * Update wallet with safe word (for migration)
+ */
+export function updateWalletSafeWord(walletData: WalletData, safeWord: string): WalletData {
+  const updatedWallet: WalletData = {
+    ...walletData,
+    safeWord: safeWord.trim(),
+    lastAccessed: new Date().toISOString()
+  };
+
+  // Save the updated wallet
+  saveWalletSecurely(updatedWallet);
+
+  return updatedWallet;
+}
+
+/**
+ * Validate safe word for authentication
+ */
+export function validateWalletSafeWord(walletData: WalletData, inputSafeWord: string): boolean {
+  if (needsSafeWordMigration(walletData)) {
+    console.warn('⚠️ Wallet requires safe word migration');
+    return false;
+  }
+
+  // Normalize both safe words for comparison (case-insensitive, trimmed)
+  const storedSafeWord = walletData.safeWord.trim().toLowerCase();
+  const providedSafeWord = inputSafeWord.trim().toLowerCase();
+
+  return storedSafeWord === providedSafeWord;
 }
 
 /**

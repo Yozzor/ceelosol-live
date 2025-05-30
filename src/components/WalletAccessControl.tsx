@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { isWhitelisted, updateLastAccessed } from '../lib/whitelist';
 import { useAuth } from '../util/auth';
+import { getAuthenticationStatus, authenticateWithSafeWord } from '../lib/safeWordAuth';
 
 interface WalletAccessControlProps {
   onAccessGranted: (walletAddress: string) => void;
@@ -12,8 +13,10 @@ export const WalletAccessControl: React.FC<WalletAccessControlProps> = ({
   onAccessDenied,
 }) => {
   const [walletAddress, setWalletAddress] = useState('');
+  const [safeWord, setSafeWord] = useState('');
   const [isChecking, setIsChecking] = useState(false);
   const [error, setError] = useState('');
+  const [showSafeWordInput, setShowSafeWordInput] = useState(false);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [privateKey, setPrivateKey] = useState('');
   const [restoreStatus, setRestoreStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -41,6 +44,16 @@ export const WalletAccessControl: React.FC<WalletAccessControlProps> = ({
     return solanaAddressRegex.test(address);
   };
 
+  // Reset safe word input when wallet address changes
+  const handleWalletAddressChange = (value: string) => {
+    setWalletAddress(value);
+    if (showSafeWordInput) {
+      setShowSafeWordInput(false);
+      setSafeWord('');
+      setError('');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -62,21 +75,13 @@ export const WalletAccessControl: React.FC<WalletAccessControlProps> = ({
         return;
       }
 
-      // Debug: Check whitelist status
-      console.log('🔍 Checking whitelist for address:', trimmedAddress);
-      const currentWhitelist = localStorage.getItem('ceelo_whitelist');
-      console.log('🔍 Current whitelist in localStorage:', currentWhitelist);
+      // Check authentication status for this wallet
+      console.log('🔍 Checking authentication status for:', trimmedAddress);
+      const authStatus = getAuthenticationStatus(trimmedAddress);
+      console.log('🔍 Authentication status:', authStatus);
 
-      // Check if whitelisted
-      const isAllowed = isWhitelisted(trimmedAddress);
-      console.log('🔍 isWhitelisted result:', isAllowed);
-
-      if (isAllowed) {
-        // Update last accessed time
-        updateLastAccessed(trimmedAddress);
-        onAccessGranted(trimmedAddress);
-      } else {
-        // Check if we have any whitelisted wallets at all
+      // If wallet is not whitelisted at all
+      if (!authStatus.isWhitelisted) {
         const currentWhitelist = localStorage.getItem('ceelo_whitelist');
         const hasWhitelist = currentWhitelist && JSON.parse(currentWhitelist).length > 0;
 
@@ -86,9 +91,46 @@ export const WalletAccessControl: React.FC<WalletAccessControlProps> = ({
           setError('No whitelisted wallets found. Please generate a new wallet or migrate from the previous version.');
         }
         onAccessDenied();
+        setIsChecking(false);
+        return;
+      }
+
+      // If wallet requires safe word authentication
+      if (authStatus.requiresSafeWord) {
+        if (!showSafeWordInput) {
+          // Show safe word input field
+          setShowSafeWordInput(true);
+          setIsChecking(false);
+          return;
+        }
+
+        // Validate safe word
+        if (!safeWord.trim()) {
+          setError('Please enter your safe word');
+          setIsChecking(false);
+          return;
+        }
+
+        // Authenticate with safe word
+        console.log('🔐 Authenticating with safe word...');
+        const authResult = await authenticateWithSafeWord(trimmedAddress, safeWord.trim());
+
+        if (authResult.success) {
+          console.log('✅ Safe word authentication successful');
+          updateLastAccessed(trimmedAddress);
+          onAccessGranted(trimmedAddress);
+        } else {
+          console.warn('❌ Safe word authentication failed:', authResult.error);
+          setError(authResult.error || 'Authentication failed');
+        }
+      } else {
+        // Legacy wallet or no safe word required - direct access
+        console.log('✅ Direct access granted (no safe word required)');
+        updateLastAccessed(trimmedAddress);
+        onAccessGranted(trimmedAddress);
       }
     } catch (error) {
-      console.error('Error checking wallet access:', error);
+      console.error('Error during authentication:', error);
       setError('An error occurred while checking your wallet. Please try again.');
     } finally {
       setIsChecking(false);
@@ -211,7 +253,7 @@ export const WalletAccessControl: React.FC<WalletAccessControlProps> = ({
                       className="form-control text-white"
                       placeholder="Enter your Solana wallet address..."
                       value={walletAddress}
-                      onChange={(e) => setWalletAddress(e.target.value)}
+                      onChange={(e) => handleWalletAddressChange(e.target.value)}
                       disabled={isChecking}
                       style={{
                         backgroundColor: 'rgba(0, 0, 0, 0.6)',
@@ -232,6 +274,51 @@ export const WalletAccessControl: React.FC<WalletAccessControlProps> = ({
                     />
                   </div>
 
+                  {/* Safe Word Input - only show when required */}
+                  {showSafeWordInput && (
+                    <div className="form-group mb-4">
+                      <label
+                        htmlFor="safeWord"
+                        className="form-label mb-2"
+                        style={{
+                          color: 'var(--sa-gold)',
+                          fontWeight: 'bold',
+                          fontSize: '1.1rem'
+                        }}
+                      >
+                        🔒 Safe Word:
+                      </label>
+                      <input
+                        type="text"
+                        id="safeWord"
+                        className="form-control text-white"
+                        placeholder="Enter your safe word..."
+                        value={safeWord}
+                        onChange={(e) => setSafeWord(e.target.value)}
+                        disabled={isChecking}
+                        style={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                          border: '2px solid var(--sa-gold)',
+                          borderRadius: '8px',
+                          fontSize: '16px',
+                          padding: '12px 16px',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = 'var(--sa-green)';
+                          e.target.style.boxShadow = '0 0 10px rgba(54, 104, 44, 0.3)';
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = 'var(--sa-gold)';
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      />
+                      <small className="text-muted mt-1 d-block">
+                        Enter the safe word that was provided when you created this wallet
+                      </small>
+                    </div>
+                  )}
+
                   {error && (
                     <div
                       className="alert mb-4"
@@ -249,7 +336,7 @@ export const WalletAccessControl: React.FC<WalletAccessControlProps> = ({
                   <button
                     type="submit"
                     className="btn w-100 text-dark font-weight-bold"
-                    disabled={isChecking || !walletAddress.trim()}
+                    disabled={isChecking || !walletAddress.trim() || (showSafeWordInput && !safeWord.trim())}
                     style={{
                       backgroundColor: 'var(--sa-green)',
                       border: '2px solid var(--sa-green)',
@@ -261,7 +348,7 @@ export const WalletAccessControl: React.FC<WalletAccessControlProps> = ({
                       transition: 'all 0.3s ease'
                     }}
                     onMouseEnter={(e) => {
-                      if (!isChecking && walletAddress.trim()) {
+                      if (!isChecking && walletAddress.trim() && (!showSafeWordInput || safeWord.trim())) {
                         const target = e.target as HTMLButtonElement;
                         target.style.backgroundColor = 'var(--sa-gold)';
                         target.style.borderColor = 'var(--sa-gold)';
@@ -280,8 +367,10 @@ export const WalletAccessControl: React.FC<WalletAccessControlProps> = ({
                     {isChecking ? (
                       <>
                         <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                        CHECKING ACCESS...
+                        {showSafeWordInput ? 'AUTHENTICATING...' : 'CHECKING ACCESS...'}
                       </>
+                    ) : showSafeWordInput ? (
+                      '🔐 AUTHENTICATE WITH SAFE WORD'
                     ) : (
                       'ACCESS GAME'
                     )}

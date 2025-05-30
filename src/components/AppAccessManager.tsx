@@ -14,7 +14,7 @@ type AccessState = 'checking' | 'access_control' | 'wallet_generation' | 'grante
 export const AppAccessManager: React.FC<AppAccessManagerProps> = ({ children }) => {
   const [accessState, setAccessState] = useState<AccessState>('checking');
   const [authorizedWallet, setAuthorizedWallet] = useState<string | null>(null);
-  const [walletInfo, setWalletInfo] = useState<{ publicKey: string; secretBase58: string; secretArray: number[] } | null>(null);
+  const [walletInfo, setWalletInfo] = useState<{ publicKey: string; secretBase58: string; secretArray: number[]; safeWord: string } | null>(null);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const { initializeFromSession } = useAuth();
 
@@ -71,7 +71,8 @@ export const AppAccessManager: React.FC<AppAccessManagerProps> = ({ children }) 
       setWalletInfo({
         publicKey: wallet.publicKey,
         secretBase58: wallet.secretBase58,
-        secretArray: wallet.secretArray
+        secretArray: wallet.secretArray,
+        safeWord: wallet.safeWord
       });
       setShowWalletModal(true);
     } catch (error) {
@@ -212,13 +213,25 @@ export const AppAccessManager: React.FC<AppAccessManagerProps> = ({ children }) 
                     <small className="text-muted">Copy this to import into Phantom wallet</small>
                   </div>
 
+                  <div className="form-group mt-3">
+                    <label className="text-success">🔒 Safe Word (for additional security):</label>
+                    <input
+                      type="text"
+                      className="form-control bg-dark text-white border-success"
+                      value={walletInfo.safeWord}
+                      readOnly
+                    />
+                    <small className="text-muted">Remember this safe word - you'll need it to access your wallet</small>
+                  </div>
+
                   <div className="alert alert-info mt-3">
                     <p className="mb-0">
                       <strong>Next Steps:</strong><br />
                       1. Copy your wallet address above<br />
                       2. Save your private key securely<br />
-                      3. Click "Continue" and enter your wallet address to access CeeloSol<br />
-                      4. Optional: Import the Base58 key into Phantom wallet
+                      3. <strong>Remember your safe word</strong> - you'll need it for authentication<br />
+                      4. Click "Continue" and enter your wallet address to access CeeloSol<br />
+                      5. Optional: Import the Base58 key into Phantom wallet
                     </p>
                   </div>
                 </div>
@@ -234,6 +247,12 @@ export const AppAccessManager: React.FC<AppAccessManagerProps> = ({ children }) 
                     onClick={() => navigator.clipboard.writeText(walletInfo.secretBase58)}
                   >
                     Copy Private Key
+                  </button>
+                  <button
+                    className="btn btn-info"
+                    onClick={() => navigator.clipboard.writeText(walletInfo.safeWord)}
+                  >
+                    Copy Safe Word
                   </button>
                   <button className="btn btn-success" onClick={handleWalletModalClose}>
                     Continue to Access Control

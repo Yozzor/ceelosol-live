@@ -308,6 +308,47 @@ io.on('connection', (socket) => {
       io.emit('lobbies:list', Array.from(lobbies.values()));
     });
   });
+
+  // Handle leaving lobby
+  socket.on('lobby:leave', (data) => {
+    const { lobbyId, walletAddress } = data;
+    console.log(`👋 Player ${walletAddress} attempting to leave lobby ${lobbyId}`);
+
+    const lobby = lobbies.get(lobbyId);
+    if (!lobby) {
+      console.log(`❌ Lobby ${lobbyId} not found for leave request`);
+      return;
+    }
+
+    // Remove player from lobby
+    const initialPlayerCount = lobby.players.length;
+    lobby.players = lobby.players.filter(p => p.walletAddress !== walletAddress);
+    const finalPlayerCount = lobby.players.length;
+
+    // Leave the socket room
+    socket.leave(lobbyId);
+
+    console.log(`👋 Player ${walletAddress} left lobby ${lobbyId} (${initialPlayerCount} -> ${finalPlayerCount} players)`);
+
+    // If lobby is empty, delete it
+    if (lobby.players.length === 0) {
+      lobbies.delete(lobbyId);
+      console.log(`🗑️ Empty lobby ${lobbyId} deleted`);
+    } else {
+      // Reset lobby status to waiting if it was in payment/ready state
+      if (lobby.status === 'payment' || lobby.status === 'ready') {
+        lobby.status = 'waiting';
+        console.log(`🔄 Reset lobby ${lobbyId} status to waiting due to player leave`);
+      }
+
+      // Broadcast updated lobby to remaining players
+      io.to(lobbyId).emit('lobby:updated', lobby);
+    }
+
+    // Broadcast updated lobby list to all clients
+    io.emit('lobbies:list', Array.from(lobbies.values()));
+  });
+
   // Handle ready status
   socket.on('lobby:ready', (data) => {
     const { lobbyId, walletAddress, isReady } = data;

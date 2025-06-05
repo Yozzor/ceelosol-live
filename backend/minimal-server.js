@@ -218,13 +218,23 @@ io.on('connection', (socket) => {
   });
 
       socket.on('lobby:create', (data) => {
+    console.log(`🏠 Lobby creation data received:`, {
+      name: data.name,
+      difficulty: data.difficulty,
+      maxPlayers: data.maxPlayers,
+      totalRounds: data.totalRounds,
+      rounds: data.rounds,
+      walletAddress: data.walletAddress
+    });
+
     const lobbyId = Date.now().toString();
     const lobby = {
       id: lobbyId,
       name: data.name || 'New Lobby',
       maxPlayers: data.maxPlayers || 4,
       betAmount: data.betAmount || 0.1,
-      rounds: data.rounds || 3,
+      rounds: data.totalRounds || data.rounds || 5, // Fix: Use totalRounds from frontend, fallback to rounds, then default to 5
+      totalRounds: data.totalRounds || data.rounds || 5, // Add totalRounds field for consistency
       difficulty: data.difficulty || 'easy',
       treasuryAddress: HOUSE_WALLET_ADDRESS,
       players: [{
@@ -239,7 +249,7 @@ io.on('connection', (socket) => {
     };
     lobbies.set(lobbyId, lobby);
     socket.join(lobbyId);
-    console.log(`🏠 Lobby created: ${lobbyId} by ${data.walletAddress}`);
+    console.log(`🏠 Lobby created: ${lobbyId} by ${data.walletAddress} with ${lobby.totalRounds} rounds`);
     socket.emit('lobby:created', { lobbyId, lobby });
     io.emit('lobbies:list', Array.from(lobbies.values()));
   });
@@ -354,14 +364,14 @@ io.on('connection', (socket) => {
       // Emit game start event with proper structure
       io.to(lobbyId).emit('game:started', {
         lobby: lobby,
-        message: `Game starting! Round 1 of ${lobby.rounds}`
+        message: `Game starting! Round 1 of ${lobby.totalRounds}`
       });
 
       // Start first round
       setTimeout(() => {
         io.to(lobbyId).emit('round:started', {
           round: 1,
-          totalRounds: lobby.rounds,
+          totalRounds: lobby.totalRounds,
           currentPlayer: lobby.players[0].walletAddress,
           betAmount: lobby.difficulty === 'easy' ? 0.1 : 0.5
         });
@@ -486,7 +496,7 @@ io.on('connection', (socket) => {
       });
 
       // Check if game is finished
-      if (gameState.currentRound >= lobby.rounds && !gameState.suddenDeath?.active) {
+      if (gameState.currentRound >= lobby.totalRounds && !gameState.suddenDeath?.active) {
         // Check for ties and handle sudden death
         checkGameEndAndHandleTies(lobby, io);
       } else if (gameState.suddenDeath?.active) {
@@ -501,7 +511,7 @@ io.on('connection', (socket) => {
         setTimeout(() => {
           io.to(lobbyId).emit('round:started', {
             round: gameState.currentRound,
-            totalRounds: lobby.rounds,
+            totalRounds: lobby.totalRounds,
             currentPlayer: lobby.players[0].walletAddress,
             betAmount: lobby.difficulty === 'easy' ? 0.1 : 0.5
           });
@@ -549,7 +559,7 @@ io.on('connection', (socket) => {
           });
 
           // Check if game is finished
-          if (gameState.currentRound >= lobby.rounds && !gameState.suddenDeath?.active) {
+          if (gameState.currentRound >= lobby.totalRounds && !gameState.suddenDeath?.active) {
             // Check for ties and handle sudden death
             checkGameEndAndHandleTies(lobby, io);
           } else if (gameState.suddenDeath?.active) {
@@ -564,7 +574,7 @@ io.on('connection', (socket) => {
             setTimeout(() => {
               io.to(lobbyId).emit('round:started', {
                 round: gameState.currentRound,
-                totalRounds: lobby.rounds,
+                totalRounds: lobby.totalRounds,
                 currentPlayer: lobby.players[0].walletAddress,
                 betAmount: lobby.difficulty === 'easy' ? 0.1 : 0.5
               });
@@ -582,7 +592,7 @@ io.on('connection', (socket) => {
             )
           });
 
-          if (gameState.currentRound >= lobby.rounds && !gameState.suddenDeath?.active) {
+          if (gameState.currentRound >= lobby.totalRounds && !gameState.suddenDeath?.active) {
             // Check for ties and handle sudden death
             checkGameEndAndHandleTies(lobby, io);
           } else if (gameState.suddenDeath?.active) {
@@ -597,7 +607,7 @@ io.on('connection', (socket) => {
             setTimeout(() => {
               io.to(lobbyId).emit('round:started', {
                 round: gameState.currentRound,
-                totalRounds: lobby.rounds,
+                totalRounds: lobby.totalRounds,
                 currentPlayer: lobby.players[0].walletAddress,
                 betAmount: lobby.difficulty === 'easy' ? 0.1 : 0.5
               });
@@ -784,7 +794,7 @@ function checkGameEndAndHandleTies(lobby, io) {
 
     // Calculate total pot (all players' commitments)
     const betAmount = lobby.difficulty === 'easy' ? 0.1 : 0.5;
-    const totalPot = betAmount * lobby.players.length * lobby.rounds;
+    const totalPot = betAmount * lobby.players.length * lobby.totalRounds;
 
     console.log(`💰 Processing winner payout: ${totalPot} SOL to ${winner[0]}`);
 
@@ -828,7 +838,7 @@ function startSuddenDeathRound(lobby, io) {
 
   io.to(lobby.id).emit('round:started', {
     round: gameState.currentRound,
-    totalRounds: lobby.rounds,
+    totalRounds: lobby.totalRounds,
     currentPlayer: lobby.players[0].walletAddress,
     betAmount: lobby.difficulty === 'easy' ? 0.1 : 0.5,
     isSuddenDeath: true,
